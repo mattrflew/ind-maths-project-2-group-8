@@ -8,6 +8,9 @@ See [Project Description](docs/8-Flocking-Obstacles-1.pdf)
 
 ## Explanation of repository
 
+### model.ipynb
+This is where the model is defined and run. Functions for model are defined within the notebook.
+
 ### exploratory directory
 
 Collection of notebooks to experiment with analysis methods and investigations for expanding on the problem.
