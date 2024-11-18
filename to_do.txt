@@ -1,11 +1,10 @@
 - Organise model into a new notebook
 - Make functions 
 
-- non-randomized starting positions/velocities
 - ⁠wind implementation 
-    - as a constant with noise
     - sinusoidal with noise?
 - ⁠calculation of some sort of coefficient for togetherness of a flock
     - Or avoidance rate
 - ⁠fixing the avoidance rule so the movement isn’t so sudden
 - Scaling of turbine size based on size of birds
+- Determine if bird hits obstacle
