@@ -307,7 +307,7 @@ def match_vel(i, vx, vy, neighbours):
 # Obstacle Velocity - velocity to avoid collision with obstacles
 # -----------------------------------------------------------------------------
 
-def obstacle_vel(i, x, y, vx, vy, R_obs, num_samples, x_obstacle_list, y_obstacle_list):
+def obstacle_vel(i, x, y, vx, vy, R_obs, r_min, num_samples, x_obstacle_list, y_obstacle_list):
 
     # Initialise velocities
     obstacle_vx = 0
@@ -448,4 +448,62 @@ def update_velocity(i, vx, vy, \
     
     return vx_new, vy_new
 
+# =============================================================================
+# Update Steps
+# ============================================================================= 
+
+def step(x, y, vx, vy, L, R, r_min, R_obs, x_obstacle_list, y_obstacle_list, N, dt, vmax, lam_a, lam_c, lam_m, lam_o):
+    '''
+    Compute a step in the dynamics:
+    - update the positions
+    - compute the new velocities
+    '''
     
+    # Update positions based on velocity and time step
+    x += vx * dt
+    y += vy * dt
+    
+    # Apply periodic boundary conditions
+    x %= L
+    y %= L
+    
+    # Initialise the new velocities
+    vx_new = np.zeros(N)
+    vy_new = np.zeros(N)
+    
+    # For each bird:
+    for i in range(N):
+        
+        # Find neighbouring birds and those that are too close
+        neighbours, too_close = proximity_lists(i, x, y, R, r_min)
+        
+        # Obstacle avoidance component
+        obstacle_vx, obstacle_vy = obstacle_vel(i, x, y, vx, vy, R_obs, 10, x_obstacle_list, y_obstacle_list)
+        
+        # Center of mass component
+        centre_vx, centre_vy = centre_vel(i, x, y, neighbours)
+        
+        # Bird avoidance component
+        avoid_vx, avoid_vy = avoid_vel(i, x, y, too_close)
+        
+        # Matching component
+        match_vx, match_vy = match_vel(i, vx, vy, neighbours)
+           
+        # Update velocity with limits
+        vx_new[i], vy_new[i] = update_velocity(i, vx, vy, \
+                                               obstacle_vx, obstacle_vy, \
+                                               centre_vx, centre_vy, \
+                                               avoid_vx, avoid_vy, \
+                                               match_vx, match_vy, \
+                                               vmax,
+                                               lam_a,
+                                               lam_c,
+                                               lam_m,
+                                               lam_o)
+    
+
+    # Update new velocities
+    vx = vx_new
+    vy = vy_new
+    
+    return x, y, vx, vy
