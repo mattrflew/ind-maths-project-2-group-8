@@ -151,6 +151,15 @@ def get_obstacles_within_radius(x_bird, y_bird, theta_bird, x_obstacle, y_obstac
 # Bird Functions
 # =============================================================================
 
+
+def add_noise_theta(theta, eta, N):
+    '''
+    Update theta with a random amount of noise between -eta/2 and eta/2
+    '''
+    theta += eta * (np.random.rand(N, 1) - 0.5)
+    
+    return theta
+
 def initialize_birds_random(N, L, v0):
     '''
     Set initial positions, direction, and velocities 
