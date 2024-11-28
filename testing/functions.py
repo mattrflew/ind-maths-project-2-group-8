@@ -151,7 +151,6 @@ def get_obstacles_within_radius(x_bird, y_bird, theta_bird, x_obstacle, y_obstac
 # Bird Functions
 # =============================================================================
 
-
 def add_noise_theta(theta, eta, N):
     '''
     Update theta with a random amount of noise between -eta/2 and eta/2
