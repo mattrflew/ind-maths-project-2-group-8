@@ -507,3 +507,13 @@ def step(x, y, vx, vy, L, R, r_min, R_obs, x_obstacle_list, y_obstacle_list, N, 
     vy = vy_new
     
     return x, y, vx, vy
+
+def update_quiver(q,x,y,vx,vy):
+    '''
+    Update a quiver with new position and velocity information
+    This is only used for plotting
+    '''
+    q.set_offsets(np.column_stack([x,y]))
+    q.set_UVC(vx,vy)
+    
+    return q
