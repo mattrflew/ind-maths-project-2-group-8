@@ -1,5 +1,15 @@
 # =============================================================================
-# Model Parameters
+# Importing Packages
+# =============================================================================  
+
+import matplotlib.pyplot as plt
+import numpy as np
+from IPython.display import display, clear_output
+import matplotlib.animation as animation
+from matplotlib.animation import FuncAnimation
+
+# =============================================================================
+# Parameters
 # =============================================================================
 
 # -----------------------------------------------------------------------------
