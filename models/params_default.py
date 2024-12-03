@@ -1,3 +1,13 @@
+"""
+# =============================================================================
+# Module: params_default.py
+# =============================================================================
+
+This module provides a class of default parameters, that are passed to each 
+model if no other class of parameters is defined.
+
+"""
+
 # =============================================================================
 # Default Parameters
 # =============================================================================
@@ -100,10 +110,3 @@ class params_default():
         self.v0_wind = v0_wind
         self.v_wind_noise = v_wind_noise
         self.wind_theta = wind_theta
-
-
-
-
-
-
-
