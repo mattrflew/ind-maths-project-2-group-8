@@ -54,6 +54,10 @@ class params_default():
         R =  1,                   # A distance over which birds can observe their neighbours, R,
         r_min =  0.1,             # a minimum distance they would like to maintain, r.
 
+        # Migratory goal vector
+        goal_x = 1          
+        goal_y = 1
+
         # -----------------------------------------------------------------------------
         # 'Mixing' parameters
         # -----------------------------------------------------------------------------
