@@ -2,7 +2,7 @@
 # Default Parameters
 # =============================================================================
 
-class default_parameters():
+class params_default():
     """
     Defines the parameters for our model
 
