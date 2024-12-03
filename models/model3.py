@@ -30,10 +30,6 @@ from matplotlib.animation import FuncAnimation
 
 
 
-
-
-
-
 # -----------------------------------------------------------------------------
 # Find Neighbours
 # -----------------------------------------------------------------------------
@@ -337,26 +333,15 @@ def obstacle_vel(i, x, y, vx, vy, R_min, R_obs, x_obstacle_list, y_obstacle_list
 # Update velocities
 # -----------------------------------------------------------------------------
        
-def update_velocity(i, vx, vy, \
-                    obstacle_vx, obstacle_vy, \
-                    centre_vx, centre_vy, \
-                    avoid_vx, avoid_vy, \
-                    match_vx, match_vy, \
-                    migrate_vx, migrate_vy, \
-                    bird_speed, \
-                    bird_speed_max, \
-                    lam_a, \
-                    lam_c, \
-                    lam_m, \
-                    lam_o, \
-                    lam_g):
-    
-    # if lam_o > 0.9:
-        
-    #     vx_new = bird_speed * obstacle_vx
-                 
-    #     vy_new = bird_speed * obstacle_vy
-        
+def update_velocity(i, vx, vy, 
+                    obstacle_vx, obstacle_vy, 
+                    centre_vx, centre_vy, 
+                    avoid_vx, avoid_vy, 
+                    match_vx, match_vy, 
+                    migrate_vx, migrate_vy, 
+                    bird_speed_max, 
+                    lam_a, lam_c, lam_m, lam_o, lam_g, lam_w,
+                    vx_wind, vy_wind):
     
     # Update velocities with contributions
     vx_new = vx[i][0] + \
@@ -364,40 +349,35 @@ def update_velocity(i, vx, vy, \
              lam_c * centre_vx + \
              lam_a * avoid_vx + \
              lam_m * match_vx + \
-             lam_g * migrate_vx
+             lam_g * migrate_vx + \
+             lam_w * vx_wind
              
     vy_new = vy[i][0] + \
              lam_o * obstacle_vy + \
              lam_c * centre_vy + \
              lam_a * avoid_vy + \
              lam_m * match_vy + \
-             lam_g * migrate_vy
+             lam_g * migrate_vy + \
+             lam_w * vy_wind
 
+    # Limit speed to maximum
+    current_speed = np.linalg.norm([vx_new, vy_new])
+    if current_speed > bird_speed_max:
+        scale = bird_speed_max / current_speed
+        vx_new *= scale
+        vy_new *= scale
     
-    # Compute the current speed
-    current_speed = np.linalg.norm([vx[i][0], vy[i][0]])
-    
-    # Add small noise to the direction
-    # noise_factor = 0.01 * current_speed  
-    # vx_new += np.random.uniform(-noise_factor, noise_factor)
-    # vy_new += np.random.uniform(-noise_factor, noise_factor)
-    
-    vx_new = min(1, bird_speed_max/current_speed) * vx_new
-    vy_new = min(1, bird_speed_max/current_speed) * vy_new
-        
     return vx_new, vy_new
 
-# =============================================================================
-# Update Steps
-# ============================================================================= 
+# -----------------------------------------------------------------------------
+# Update steps
+# -----------------------------------------------------------------------------
 
-def step(x, y, vx, vy, L, R_bird, R_min, N, dt, bird_speed_max, lam_a, lam_c, lam_m, lam_g, goal_x, goal_y, x_obstacle_list, y_obstacle_list):
+def step(x, y, vx, vy, L, R_bird, R_min, N, dt, bird_speed_max, lam_a, lam_c, lam_m, lam_o, lam_g, lam_w, goal_x, goal_y, t):
     '''
-    
     Compute a step in the dynamics:
     - update the positions
     - compute the new velocities
-    
     '''
     
     # Update positions based on velocity and time step
@@ -412,6 +392,9 @@ def step(x, y, vx, vy, L, R_bird, R_min, N, dt, bird_speed_max, lam_a, lam_c, la
     vx_new = np.zeros(N)
     vy_new = np.zeros(N)
     
+    # Get combined wind velocity components
+    vx_wind, vy_wind = wind_combined(x, y, t, A_x, A_y, k, f)
+    
     # For each bird:
     for i in range(N):
         
@@ -419,7 +402,7 @@ def step(x, y, vx, vy, L, R_bird, R_min, N, dt, bird_speed_max, lam_a, lam_c, la
         neighbours, too_close = proximity_lists(i, x, y, R_bird, R_min)
         
         # Obstacle avoidance component
-        obstacle_vx, obstacle_vy, lam_o = obstacle_vel(i, x, y, vx, vy, R_min, R_obs, x_obstacle_list, y_obstacle_list, num_samples = 10)
+        obstacle_vx, obstacle_vy = 0, 0
         
         # Center of mass component
         centre_vx, centre_vy = centre_vel(i, x, y, neighbours)
@@ -434,27 +417,21 @@ def step(x, y, vx, vy, L, R_bird, R_min, N, dt, bird_speed_max, lam_a, lam_c, la
         migrate_vx, migrate_vy = migratory_vel(goal_x, goal_y)
            
         # Update velocity with limits
-        vx_new[i], vy_new[i] = update_velocity(i, vx, vy, \
-                                obstacle_vx, obstacle_vy, \
-                                centre_vx, centre_vy, \
-                                avoid_vx, avoid_vy, \
-                                match_vx, match_vy, \
-                                migrate_vx, migrate_vy, \
-                                bird_speed, \
-                                bird_speed_max, \
-                                lam_a, \
-                                lam_c, \
-                                lam_m, \
-                                lam_o, \
-                                lam_g)
+        vx_new[i], vy_new[i] = update_velocity(i, vx, vy, 
+                                    obstacle_vx, obstacle_vy, 
+                                    centre_vx, centre_vy, 
+                                    avoid_vx, avoid_vy, 
+                                    match_vx, match_vy, 
+                                    migrate_vx, migrate_vy, 
+                                    bird_speed_max, 
+                                    lam_a, lam_c, lam_m, lam_o, lam_g, lam_w,
+                                    vx_wind[i], vy_wind[i])
     
-
     # Update new velocities
     vx = np.array(vx_new).reshape(-1, 1)
     vy = np.array(vy_new).reshape(-1, 1)
     
     return x, y, vx, vy
-
 
 # -----------------------------------------------------------------------------
 # Run Model 3
@@ -467,62 +444,34 @@ def run_model3(params, plot=False):
 
         # Then use default parameters
         params = params_default() 
-    
 
-    # Fetch parameters necessary to run Model 3:
+    # Fetch the obstacles in the environment
+    x_obstacle_list, y_obstacle_list, x_obstacle, y_obstacle = initialize_obstacles(
+        L = L.params, 
+        num_obstacles = num_obstacles.params, 
+        nrows = nrows.params, 
+        ncols = ncols.params, 
+        shape = shape.params, 
+        x_spacing = x_spacing.params,
+        y_spacing = y_spacing.params,
+        offset= offset.params, 
+        beta = beta.params
+    )
 
-    # Time & Space
-    dt = params.dt,                 # Time step
-    Nt = 100,                 # No. of time steps
-    L = 10,                   # Size of box (Area of a wind farm)
+    # Fetch the initial birds in the environment
+    x, y, vx, vy, _ = initialize_birds(
+        N = N.params, 
+        L = L.params, 
+        v0 = v0.params, 
+        theta_start = theta_start.params, 
+        eta = eta.params,
+        method = method.params
+    )
 
-    # Birds
-    v0 = 1.0,                 # velocity of birds (constant)
-    vmax = 2.0,               # Maximum velocity 
-    eta = 0.5,                # maximum random fluctuation in angle (in radians)
-    R_bird = 1,               # interaction radius (bird-bird)
-    Rsq = R_bird**2,          # square of the interaction radius
-    N = 25,                   # number of birds
-    fov_angle = np.pi,        # Field of View of birds
-    R =  1,                   # A distance over which birds can observe their neighbours, R,
-    r_min =  0.1,             # a minimum distance they would like to maintain, r.
-
-    # Migratory goal vector
-    goal_x = 1          
-    goal_y = 1
-
-    # 'Mixing' parameters
-    lam_c = 1.0,              # Centering Parameter
-    lam_a = 1.0,              # Avoidance Parameter
-    lam_m = 1.0,              # Matching Parameter
-    lam_o = 1.0,              # Obstacle Parameter
-
-    # Obstacles
-    R_obs = 0.5              # Interaction radius (bird - obstacles)
-
-    # Wind
-    v0_wind = 0.5           # Velocity of wind (constant)
-    v_wind_noise = 0.1      # Maximum random fluctuation in wind velocity (in same units as v0_wind)
-    wind_theta = 0          # Wind direction 
-
-
-
-
-    x_obstacle_list, y_obstacle_list, x_obstacle, y_obstacle = get_obstacles(L, num_obstacles, nrows, ncols)
-
-    initialize_obstacles(L, num_obstacles, nrows, ncols, shape="elliptical", x_spacing=15, y_spacing=10, offset=5, beta=np.radians(0))
-
-    # Initialize figure and axes
+    # Set up the figure and axis
     fig, ax = plt.subplots(figsize=(5, 5))
 
-    # Plot obstacles
-    for xx, yy in zip(x_obstacle_list, y_obstacle_list):
-        ax.plot(xx, yy, 'r-')
-
-    # Get the initial bird configuration
-    x, y, vx, vy = flock_uniform(N, L, bird_speed)
-
-    # Initialize quiver plot for birds
+    # Initialize quiver plot
     q = ax.quiver(x, y, vx, vy)
 
     # Set figure parameters
@@ -531,30 +480,53 @@ def run_model3(params, plot=False):
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
 
-    # Define the update function for the animation
-    def update_func(frame):
-        """
-        Update function for each frame in the animation.
-        """
-        global x, y, vx, vy
-        
+    # Plot obstacle(s) - Plot the "list" to visualise the different obstaclces properly
+    for xx, yy in zip(x_obstacle_list, y_obstacle_list):
+        ax.plot(xx, yy, 'r-')
+
+    # Wind visualization
+    vx_wind, vy_wind = wind_combined(x, y, 0, A_x, A_y, k, f)
+    wind_quiver = ax.quiver(0, 0, vx_wind.mean(), vy_wind.mean(), color='red', scale=1)
+
+    # Metrics storage 
+    dispersion_values = []
+    offset_values = []
+    clustering_coefficients = []
+
+    # Function to update each frame
+    for t in range(Nt):
+
         # Update bird positions and velocities
-        x, y, vx, vy = step(x, y, vx, vy, L, R_bird, R_min, N, dt, 
-                            bird_speed_max, lam_a, lam_c, lam_m, lam_g, 
-                            goal_x, goal_y, x_obstacle_list, y_obstacle_list)
-        
-        # Update the quiver plot with new data
-        q.set_offsets(np.column_stack([x, y]))
-        q.set_UVC(vx, vy)
-        
-        
-        return q,
+        x, y, vx, vy = step(
+            x = , 
+            y = , 
+            vx = , 
+            vy = , 
+            L = , 
+            R_bird = , 
+            R_min = , 
+            N = , 
+            dt = , 
+            bird_speed_max = ,
+            lam_a = , 
+            lam_c = , 
+            lam_m = , 
+            lam_g = , 
+            goal_x = , 
+            goal_y = ,
+            x_obstacle_list = , 
+            y_obstacle_list = )
 
-    # Create the animation
-    ani = FuncAnimation(fig, update_func, frames=Nt, interval=50, blit=True)
+        vx_wind, vy_wind = wind_combined(x, y, t * dt, A_x, A_y, k, f)
 
-    # Display the animation in the notebook
-    HTML(ani.to_jshtml())
+        # Append metric values
+        dispersion_values.append(calculate_dispersion(x, y))
+        offset_values.append(calculate_path_offset(x, y, goal_x, goal_y))
+        clustering_coefficients.append(get_clustering_coefficient(vx, vy, v0, vx_wind, vy_wind, N))
 
-    # Show the animation
-    plt.show()
+        # Plot
+        if plot:
+            q = update_quiver(q, x, y, vx, vy)
+            wind_quiver.set_UVC(vx_wind.mean(), vy_wind.mean())
+            clear_output(wait=True)
+            display(fig)

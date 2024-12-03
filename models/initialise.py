@@ -9,18 +9,22 @@ environment.
 The reason this module is kept separate is because initialisation does not
 change across the different models.
 
-For the initialisation of birds we define three functions:
+For the initialisation of birds we define:
 
 1) initialize_birds_random() - 
 2) initialize_birds_square() - 
 3) initialize_birds_triangle -
 
-For the initialision of objects we define ___ functions:
+For the initialision of objects we define:
 
 1) make_rectangular_obstacle() - 
 2) make_circular_obstacle() - 
 3) make_elliptical_obstacle() - 
 3) get_obstacle_rectangle_grid() -
+
+For the initialisation of wind we define:
+
+
 
 Master functions:
 
@@ -340,10 +344,63 @@ def get_obstacle_rectangle_grid(L, nrows, ncols, x_spacing, y_spacing, offset, b
     return x_centres, y_centres
 
 # =============================================================================
+# Wind Functions
+# =============================================================================
+
+def wind_constant_with_noise(v0_wind, v_wind_noise, wind_theta):
+    '''
+    Returns the x, y components of wind based on a constant angle.
+    '''
+    # Add random noise to the wind
+    v0_wind += v_wind_noise * (np.random.rand(1) - 0.5)[0]
+
+    # Get x, y velocity components
+    vx_wind = v0_wind * np.cos(wind_theta)
+    vy_wind = v0_wind * np.sin(wind_theta)
+    
+    return vx_wind, vy_wind
+
+def wind_dynamic(t, A_x, A_y, f):
+    '''
+    Returns the x, y components of wind as sinusoidal functions over time.
+    '''
+    vx_wind = A_x * np.sin(2 * np.pi * f * t)
+    vy_wind = A_y * np.cos(2 * np.pi * f * t)
+    
+    return vx_wind, vy_wind
+
+def wind_spatial(x, y, A_x, A_y, k):
+    '''
+    Returns the x, y components of wind as functions of position with exponential decay.
+    '''
+    vx_wind = A_x * np.exp(-k * x)
+    vy_wind = A_y * np.exp(-k * y)
+
+    return vx_wind, vy_wind
+
+def wind_combined(x, y, t, A_x, A_y, k, f):
+    '''
+    Returns the x, y components of wind as a combination of spatial decay and dynamic sinusoidal variation.
+    '''
+    vx_spatial = A_x * np.exp(-k * x)
+    vy_spatial = A_y * np.exp(-k * y)
+    
+    vx_dynamic = A_x * np.sin(2 * np.pi * f * t)
+    vy_dynamic = A_y * np.cos(2 * np.pi * f * t)
+    
+    # Combine spatial and dynamic components
+    vx_wind = vx_spatial + vx_dynamic
+    vy_wind = vy_spatial + vy_dynamic
+    
+    return vx_wind, vy_wind
+
+
+
+# =============================================================================
 # Master Functions
 # =============================================================================
 
-def initialize_birds(method="random", N, L, v0, theta_start, eta):
+def initialize_birds(N, L, v0, theta_start, eta, method="v-flock"):
     """
     Master function to initialise birds based on the specified method
 

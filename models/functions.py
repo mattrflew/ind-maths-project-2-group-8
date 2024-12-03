@@ -19,6 +19,18 @@ import numpy as np
 # Helper Functions
 # =============================================================================
 
+def add_noise_theta(theta, eta, N):
+    '''
+    Update theta with a random amount of noise between -eta/2 and eta/2
+    '''
+    theta += eta * (np.random.rand(N, 1) - 0.5)
+    
+    return theta
+
+# -----------------------------------------------------------------------------
+# Vector Operations
+# -----------------------------------------------------------------------------
+
 def normalise(v):
     """ 
     Normalise a vector to length 1    
@@ -47,13 +59,9 @@ def distance(u, v):
     
     return distance
 
-def add_noise_theta(theta, eta, N):
-    '''
-    Update theta with a random amount of noise between -eta/2 and eta/2
-    '''
-    theta += eta * (np.random.rand(N, 1) - 0.5)
-    
-    return theta
+# -----------------------------------------------------------------------------
+# Plotting Functions
+# -----------------------------------------------------------------------------
 
 def update_quiver(q,x,y,vx,vy):
     '''
@@ -65,3 +73,18 @@ def update_quiver(q,x,y,vx,vy):
     q.set_UVC(vx,vy)
     
     return q
+
+# -----------------------------------------------------------------------------
+# Metrics Calculations
+# -----------------------------------------------------------------------------
+
+def calculate_dispersion(x, y):
+    x_mean, y_mean = np.mean(x), np.mean(y)
+    distances = np.sqrt((x - x_mean)**2 + (y - y_mean)**2)
+    dispersion = np.mean(distances)
+    return dispersion
+
+def calculate_path_offset(x, y, goal_x, goal_y):
+    center_x, center_y = np.mean(x), np.mean(y)
+    offset = np.sqrt((center_x - goal_x)**2 + (center_y - goal_y)**2)
+    return offset
