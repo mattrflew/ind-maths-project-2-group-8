@@ -22,9 +22,12 @@ For the initialision of objects we define:
 3) make_elliptical_obstacle() - 
 3) get_obstacle_rectangle_grid() -
 
-For the initialisation of wind we define:
+For the addition of wind we define:
 
-
+1) wind_constant_with_noise()
+2) wind_dynamic()
+3) wind_spatial()
+4) wind_combined(x, y, t, A_x, A_y, k, f)
 
 Master functions:
 
@@ -37,6 +40,10 @@ Master functions:
 
    Depending on the shape of obstacles chosen, this function returns the x, y points
    of the objects in the environment.
+
+3) wind():
+
+   Depending on the type of wind chosen, this function returns the 
 
 """
 
@@ -452,3 +459,26 @@ def initialize_obstacles(L, num_obstacles, nrows, ncols, shape="elliptical", x_s
     y_obstacle = np.concatenate(y_obstacle_list)
     
     return x_obstacle_list, y_obstacle_list, x_obstacle, y_obstacle
+
+def wind(x, y, t, A_x, A_y, k, f, method="combined"):
+    """
+    Master function to add wind to the model, based on the specified method
+
+    The outputs of each of the individual functions are vx_wind, vy_wind
+    """
+
+    if method == "constant":
+        return wind_constant_with_noise(v0_wind, v_wind_noise, wind_theta)
+
+    elif method == "dynamic":
+        return wind_dynamic(t, A_x, A_y, f)
+
+    elif method == "spatial":
+        return wind_spatial(x, y, A_x, A_y, k)
+
+    elif method == "combined":
+        return wind_combined(x, y, t, A_x, A_y, k, f)
+    else:
+        raise ValueError(f"Unknown initialisation method: {method}. Choose from 'constant', 'dynamic', 'spatial', 'combined'.")
+
+
