@@ -12,6 +12,13 @@ model, that are not specific to the chosen model.
 # Importing Modules
 # =============================================================================
 
+import numpy as np
+
+
+# =============================================================================
+# Helper Functions
+# =============================================================================
+
 def normalise(v):
     """ 
     Normalise a vector to length 1    

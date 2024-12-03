@@ -13,7 +13,7 @@ This module provides functions for the simulation of Model 3.
 
 # Import all intermediate functions
 from functions import *
-import model_params as params
+from params_default import params_default
 
 # Import packages
 import matplotlib.pyplot as plt
@@ -27,6 +27,12 @@ from matplotlib.animation import FuncAnimation
 # =============================================================================
 # Model 3
 # =============================================================================
+
+
+
+
+
+
 
 # -----------------------------------------------------------------------------
 # Find Neighbours
@@ -454,15 +460,57 @@ def step(x, y, vx, vy, L, R_bird, R_min, N, dt, bird_speed_max, lam_a, lam_c, la
 # Run Model 3
 # -----------------------------------------------------------------------------
 
-run_model3(plot=False):
+def run_model3(params, plot=False):
 
-    # Get obstacles
-    # Number of obstacles
-    num_obstacles = 8
-    nrows = 4
-    ncols = 2
+    # If no parameters are supplied,
+    if params is None:
+
+        # Then use default parameters
+        params = params_default() 
+    
+
+    # Fetch parameters necessary to run Model 3:
+
+    # Time & Space
+    dt = params.dt,                 # Time step
+    Nt = 100,                 # No. of time steps
+    L = 10,                   # Size of box (Area of a wind farm)
+
+    # Birds
+    v0 = 1.0,                 # velocity of birds (constant)
+    vmax = 2.0,               # Maximum velocity 
+    eta = 0.5,                # maximum random fluctuation in angle (in radians)
+    R_bird = 1,               # interaction radius (bird-bird)
+    Rsq = R_bird**2,          # square of the interaction radius
+    N = 25,                   # number of birds
+    fov_angle = np.pi,        # Field of View of birds
+    R =  1,                   # A distance over which birds can observe their neighbours, R,
+    r_min =  0.1,             # a minimum distance they would like to maintain, r.
+
+    # Migratory goal vector
+    goal_x = 1          
+    goal_y = 1
+
+    # 'Mixing' parameters
+    lam_c = 1.0,              # Centering Parameter
+    lam_a = 1.0,              # Avoidance Parameter
+    lam_m = 1.0,              # Matching Parameter
+    lam_o = 1.0,              # Obstacle Parameter
+
+    # Obstacles
+    R_obs = 0.5              # Interaction radius (bird - obstacles)
+
+    # Wind
+    v0_wind = 0.5           # Velocity of wind (constant)
+    v_wind_noise = 0.1      # Maximum random fluctuation in wind velocity (in same units as v0_wind)
+    wind_theta = 0          # Wind direction 
+
+
+
 
     x_obstacle_list, y_obstacle_list, x_obstacle, y_obstacle = get_obstacles(L, num_obstacles, nrows, ncols)
+
+    initialize_obstacles(L, num_obstacles, nrows, ncols, shape="elliptical", x_spacing=15, y_spacing=10, offset=5, beta=np.radians(0))
 
     # Initialize figure and axes
     fig, ax = plt.subplots(figsize=(5, 5))

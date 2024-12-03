@@ -53,6 +53,7 @@ class params_default():
         fov_angle = np.pi,        # Field of View of birds
         R =  1,                   # A distance over which birds can observe their neighbours, R,
         r_min =  0.1,             # a minimum distance they would like to maintain, r.
+        R_obs = 0.5              # Interaction radius (bird - obstacles)
 
         # Migratory goal vector
         goal_x = 1          
@@ -73,7 +74,14 @@ class params_default():
         # Obstacles
         # -----------------------------------------------------------------------------
 
-        R_obs = 0.5              # Interaction radius (bird - obstacles)
+        num_obstacles = 8,
+        nrows = 4,
+        ncols = 2,
+        shape="elliptical",
+        x_spacing = 15
+        y_spacing = 10,
+        offset= 5, 
+        beta = np.radians(0),
 
         # -----------------------------------------------------------------------------
         # Wind
