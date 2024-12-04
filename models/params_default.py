@@ -102,7 +102,7 @@ class params_default:
         self.rotor_spacing_side = 5                                 # Num diameters to the side between turbines
         self.rotor_spacing_behind = 9                               # Num diameters behind between turbines
         self.x_spacing = (self.rotor_spacing_side + 1)*self.diameter      # Spacing to the side between turbines
-        self.y_spacing = (self.rotor_spacing_behin + 1)*self.diameter    # Spacing behind between the turbines
+        self.y_spacing = (self.rotor_spacing_behind + 1)*self.diameter    # Spacing behind between the turbines
         
         # By having these at 0, it is a rectangular grid
         self.offset = 0                                             # Offset in grid layout, applied to every other row
