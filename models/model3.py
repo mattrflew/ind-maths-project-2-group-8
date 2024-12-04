@@ -11,8 +11,9 @@ This module provides functions for the simulation of Model 3.
 # Importing Modules
 # =============================================================================
 
-# Import all intermediate functions
+# Import all intermediate and initialisation functions
 from functions import *
+from initialise import *
 from params_default import params_default
 
 # Import packages
@@ -447,25 +448,25 @@ def run_model3(params, plot=False):
 
     # Fetch the obstacles in the environment
     x_obstacle_list, y_obstacle_list, x_obstacle, y_obstacle = initialize_obstacles(
-        L = L.params, 
-        num_obstacles = num_obstacles.params, 
-        nrows = nrows.params, 
-        ncols = ncols.params, 
-        shape = shape.params, 
-        x_spacing = x_spacing.params,
-        y_spacing = y_spacing.params,
-        offset= offset.params, 
-        beta = beta.params
+        L = params.L , 
+        num_obstacles = params.num_obstacles, 
+        nrows = params.nrows, 
+        ncols = params.ncols, 
+        shape = params.shape, 
+        x_spacing = params.x_spacing,
+        y_spacing = params.y_spacing,
+        offset = params.offset, 
+        beta = params.beta
     )
 
     # Fetch the initial birds in the environment
     x, y, vx, vy, _ = initialize_birds(
-        N = N.params, 
-        L = L.params, 
-        v0 = v0.params, 
-        theta_start = theta_start.params, 
-        eta = eta.params,
-        method = method.params
+        N = params.N, 
+        L = params.L, 
+        v0 = params.v0, 
+        theta_start = params.theta_start, 
+        eta = params.eta,
+        method = params.method
     )
 
     # Set up the figure and axis
@@ -475,7 +476,7 @@ def run_model3(params, plot=False):
     q = ax.quiver(x, y, vx, vy)
 
     # Set figure parameters
-    ax.set(xlim=(0, L), ylim=(0, L))
+    ax.set(xlim=(0, params.L), ylim=(0, params.L))
     ax.set_aspect('equal')
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
@@ -485,7 +486,7 @@ def run_model3(params, plot=False):
         ax.plot(xx, yy, 'r-')
 
     # Wind visualization
-    vx_wind, vy_wind = wind_combined(x, y, 0, A_x, A_y, k, f)
+    vx_wind, vy_wind = wind_combined(x, y, 0, params.A_x, params.A_y, params.k, params.f)
     wind_quiver = ax.quiver(0, 0, vx_wind.mean(), vy_wind.mean(), color='red', scale=1)
 
     # Metrics storage 
@@ -494,35 +495,35 @@ def run_model3(params, plot=False):
     clustering_coefficients = []
 
     # Function to update each frame
-    for t in range(Nt):
+    for t in range(params.Nt):
 
         # Update bird positions and velocities
         x, y, vx, vy = step(
-            x = , 
-            y = , 
-            vx = , 
-            vy = , 
-            L = , 
-            R_bird = , 
-            R_min = , 
-            N = , 
-            dt = , 
-            bird_speed_max = ,
-            lam_a = , 
-            lam_c = , 
-            lam_m = , 
-            lam_g = , 
-            goal_x = , 
-            goal_y = ,
-            x_obstacle_list = , 
-            y_obstacle_list = )
+            x = x, 
+            y = y, 
+            vx = vx, 
+            vy = vy, 
+            L = params.L, 
+            R_bird = params.R_bird, 
+            R_min = params.r_min, 
+            N = params.N, 
+            dt = params.dt, 
+            bird_speed_max = params.vmax,
+            lam_a = params.lam_a, 
+            lam_c = params.lam_c, 
+            lam_m = params.lam_m, 
+            lam_g = params.lam_g, 
+            goal_x = params.goal_x, 
+            goal_y = params.goal_y
+            x_obstacle_list = x_obstacle_list, 
+            y_obstacle_list = y_obstacle_list)
 
-        vx_wind, vy_wind = wind_combined(x, y, t * dt, A_x, A_y, k, f)
+        vx_wind, vy_wind = wind_combined(x, y, t * params.dt, params.A_x, params.A_y, params.k, params.f)
 
         # Append metric values
         dispersion_values.append(calculate_dispersion(x, y))
-        offset_values.append(calculate_path_offset(x, y, goal_x, goal_y))
-        clustering_coefficients.append(get_clustering_coefficient(vx, vy, v0, vx_wind, vy_wind, N))
+        offset_values.append(calculate_path_offset(x, y, params.goal_x, params.goal_y))
+        clustering_coefficients.append(get_clustering_coefficient(vx, vy, params.v0, vx_wind, vy_wind, params.N))
 
         # Plot
         if plot:
