@@ -52,7 +52,7 @@ Master functions:
 # =============================================================================
 
 # Import all intermediate functions
-from .functions import *
+from .functions import add_noise_theta
 
 # Import packages
 import numpy as np
