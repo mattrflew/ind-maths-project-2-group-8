@@ -571,3 +571,5 @@ def run_model3(params, plot=False):
             wind_quiver.set_UVC(vx_wind.mean(), vy_wind.mean())
             clear_output(wait=True)
             display(fig)
+        
+        return dispersion_values, offset_values, clustering_coefficients
