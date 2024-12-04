@@ -29,8 +29,6 @@ from matplotlib.animation import FuncAnimation
 # Model 3
 # =============================================================================
 
-
-
 # -----------------------------------------------------------------------------
 # Find Neighbours
 # -----------------------------------------------------------------------------
@@ -396,10 +394,14 @@ def step(
     goal_y,
     x_obstacle_list,
     y_obstacle_list,
+    v0_wind, 
+    v_wind_noise, 
+    wind_theta,
     A_x,
     A_y,
     k,
     f,
+    wind_method,
     t
 ):
     
@@ -414,15 +416,15 @@ def step(
     y += vy * dt
     
     # Apply periodic boundary conditions
-    x %= L
-    y %= L
+    # x %= L
+    # y %= L
     
     # Initialise the new velocities
     vx_new = np.zeros(N)
     vy_new = np.zeros(N)
     
     # Get combined wind velocity components
-    vx_wind, vy_wind = wind_combined(x, y, t, A_x, A_y, k, f)
+    vx_wind, vy_wind = wind(x, y, t, v0_wind, v_wind_noise, wind_theta, A_x, A_y, k, f, wind_method)
     
     # For each bird:
     for i in range(N):
@@ -514,7 +516,7 @@ def run_model3(params, plot=False):
         ax.plot(xx, yy, 'r-')
 
     # Wind visualization
-    vx_wind, vy_wind = wind_combined(x, y, 0, params.A_x, params.A_y, params.k, params.f)
+    vx_wind, vy_wind = wind(x, y, t, params.v0_wind, params.v_wind_noise, params.wind_theta, params.A_x, params.A_y, params.k, params.f, params.wind_method)
     wind_quiver = ax.quiver(0, 0, vx_wind.mean(), vy_wind.mean(), color='red', scale=1)
 
     # Metrics storage 
@@ -527,34 +529,36 @@ def run_model3(params, plot=False):
 
         # Update bird positions and velocities
         x, y, vx, vy = step(
-            x = x, 
-            y = y, 
-            vx = vx, 
-            vy = vy, 
-            L = params.L, 
-            R_bird = params.R_bird, 
-            R_min = params.r_min, 
-            N = params.N, 
-            dt = params.dt, 
-            bird_speed_max = params.vmax,
-            lam_a = params.lam_a, 
-            lam_c = params.lam_c, 
-            lam_m = params.lam_m, 
-            lam_g = params.lam_g, 
-            lam_o = params.lam_o,
-            lam_w = params.lam_w,
-            goal_x = params.goal_x, 
-            goal_y = params.goal_y,
-            x_obstacle_list = x_obstacle_list, 
-            y_obstacle_list = y_obstacle_list,
-            A_x = params.A_x,
-            A_y = params.A_y,
-            k = params.k,
-            f = params.f,
-            t = t
-        )
-
-        vx_wind, vy_wind = wind_combined(x, y, t * params.dt, params.A_x, params.A_y, params.k, params.f)
+        x = x,
+        y = y,
+        vx = vx,
+        vy = vy,
+        L = params.L,
+        R_bird = params.R_bird,
+        R_min = params.r_min,
+        N = params.N,
+        dt = params.dt,
+        bird_speed_max = params.vmax,
+        lam_a = params.lam_a,
+        lam_c = params.lam_c,
+        lam_m = params.lam_m,
+        lam_g = params.lam_g,
+        lam_o = params.lam_o,
+        lam_w = params.lam_w,
+        goal_x = params.goal_x,
+        goal_y = params.goal_y,
+        x_obstacle_list = x_obstacle_list,
+        y_obstacle_list = y_obstacle_list,
+        v0_wind = params.v0_wind, 
+        v_wind_noise = params.v_wind_noise, 
+        wind_theta = params.wind_theta,
+        A_x = params.A_x,
+        A_y = params.A_y,
+        k = params.k,
+        f = params.f,
+        wind_method = params.wind_method,
+        t = t
+    )
 
         # Append metric values
         dispersion_values.append(calculate_dispersion(x, y))
