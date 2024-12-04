@@ -54,12 +54,8 @@ Master functions:
 # Import all intermediate functions
 from .functions import *
 
-import importlib
-import matplotlib.pyplot as plt
+# Import packages
 import numpy as np
-from IPython.display import display, clear_output
-import matplotlib.animation as animation
-from matplotlib.animation import FuncAnimation
 
 # =============================================================================
 # Initialise Birds Functions
@@ -210,9 +206,6 @@ def initialize_birds_triangle(N, L, v0, theta_start, eta):
 # =============================================================================
 # Initialise Obstacles Functions
 # =============================================================================
-
-# Obstacles are defined by:
-# - Their position (x,y) 
 
 def make_rectangular_obstacle(x_centre, y_centre, n, L1=10, L2=2):
     '''
