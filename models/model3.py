@@ -152,7 +152,7 @@ def obstacle_vel(i, x, y, vx, vy, R_min, R_obs, x_obstacle_list, y_obstacle_list
     # -------------------------------------------------------------------------
     
     # Initialise obstacle velocity as 0
-    lam_o = 0
+    # lam_o = 0
     obstacle_vx = 0
     obstacle_vy = 0
     
@@ -197,7 +197,7 @@ def obstacle_vel(i, x, y, vx, vy, R_min, R_obs, x_obstacle_list, y_obstacle_list
     if not too_close_points:
         
         # The bird doesn't need a obstacle velocity component, return 0 
-        return obstacle_vx, obstacle_vy, lam_o
+        return obstacle_vx, obstacle_vy
     
     # -------------------------------------------------------------------------
     # If possible collision detected, find what object this is for
@@ -325,7 +325,7 @@ def obstacle_vel(i, x, y, vx, vy, R_min, R_obs, x_obstacle_list, y_obstacle_list
     steer_vec = normalise(safe_point - bird_loc) 
     obstacle_vx, obstacle_vy = steer_vec
          
-    return obstacle_vx, obstacle_vy, lam_o
+    return obstacle_vx, obstacle_vy
 
 
 # -----------------------------------------------------------------------------
@@ -381,6 +381,7 @@ def step(
     L,
     R_bird,
     R_min,
+    R_obs,
     N,
     dt,
     bird_speed_max,
@@ -434,7 +435,7 @@ def step(
         neighbours, too_close = proximity_lists(i, x, y, R_bird, R_min)
         
         # Obstacle avoidance component
-        obstacle_vx, obstacle_vy = 0, 0
+        obstacle_vx, obstacle_vy = obstacle_vel(i, x, y, vx, vy, R_min, R_obs, x_obstacle_list, y_obstacle_list, num_samples = 10)
         
         # Center of mass component
         centre_vx, centre_vy = centre_vel(i, x, y, neighbours)
@@ -549,6 +550,7 @@ def run_model3(params, plot = False):
             L=params.L,
             R_bird=params.R_bird,
             R_min=params.r_min,
+            R_obs = params.R_obs,
             N=params.N,
             dt=params.dt,
             bird_speed_max=params.vmax,
