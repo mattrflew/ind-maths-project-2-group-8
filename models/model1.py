@@ -46,7 +46,7 @@ def update_positions(x, y, vx, vy, dt, L):
     y += vy*dt
     
     # apply boundary conditions
-    x, y = apply_boundary_conditions(x,y,L)
+    # x, y = apply_boundary_conditions(x,y,L)
     return x, y
 
 
@@ -138,10 +138,9 @@ def update_theta(x, y, theta, Rsq, x_obstacle, y_obstacle, R_obs, eta, N, fov_an
                 theta_new[i] = mean_theta[i]
     
         
-        # If no obstacle, use theta from neighbours
+        # If no obstacle, use theta from neighbours and migration goal
         else:
             theta_new[i] = mean_theta[i]
-        
     
     theta_new = add_noise_theta(theta_new, eta, N)
     
@@ -201,7 +200,7 @@ def step(x, y, vx, vy, x_obstacle, y_obstacle, L, v0, theta, Rsq, R_obs,  eta, f
     #vx, vy = update_velocities(v0, theta, vx_wind, vy_wind, v_wind_max=10, alpha=0.5)
     vx, vy = update_velocities_original(v0, theta, vx_wind, vy_wind)
     
-    return x, y, vx, vy, vx_wind, vy_wind
+    return x, y, vx, vy, vx_wind, vy_wind, theta
 
 
 
@@ -236,7 +235,8 @@ def run_model1(params, plot = False):
         x_spacing = params.x_spacing, 
         y_spacing = params.y_spacing, 
         offset = params.offset, 
-        beta = params.beta
+        beta = params.beta,
+        n = params.n
     )
 
     # Fetch the initial birds in the environment
@@ -273,7 +273,7 @@ def run_model1(params, plot = False):
     # Do each step, updating the quiver and plotting the new one
     for i in range(params.Nt):
 
-        x, y, vx, vy, vx_wind, vy_wind = step(
+        x, y, vx, vy, vx_wind, vy_wind, theta = step(
             x = x, 
             y = y, 
             vx = vx, 
