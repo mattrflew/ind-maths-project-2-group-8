@@ -207,7 +207,7 @@ def initialize_birds_triangle(N, L, v0, theta_start, eta):
 # Initialise Obstacles Functions
 # =============================================================================
 
-def make_rectangular_obstacle(x_centre, y_centre, n, L1=10, L2=2):
+def make_rectangular_obstacle(x_centre, y_centre, n, L1, L2):
     '''
     Returns x,y points defining a rectangular-shaped obstacle
     '''
@@ -249,7 +249,7 @@ def make_rectangular_obstacle(x_centre, y_centre, n, L1=10, L2=2):
     return x_points, y_points
 
 
-def make_circular_obstacle(x_centre, y_centre, n, R=2.5):
+def make_circular_obstacle(x_centre, y_centre, n, R):
     '''
     Returns x,y points defining a circular-shaped obstacle
     '''
@@ -261,7 +261,7 @@ def make_circular_obstacle(x_centre, y_centre, n, R=2.5):
     return x, y
 
 
-def make_elliptical_obstacle(x_centre, y_centre, n, Rx=10, Ry=2):
+def make_elliptical_obstacle(x_centre, y_centre, n, Rx, Ry):
     '''
     Returns x,y points defining a elliptical-shaped obstacle
     '''
@@ -290,10 +290,11 @@ def get_obstacle_rectangle_grid(L, nrows, ncols, x_spacing, y_spacing, offset, b
     
     # Defining the "wind farm area"
     # in the x direction it goes from 0 to L
-    # in the y direction it goes from L/2 to L
+    # in the y direction it goes from L/4 to L
 
-    min_x, max_x = L/4, 3*L/4
-    min_y, max_y = L/2, L
+    # min_x, max_x = L/4, 3*L/4
+    min_x, max_x = 0, L
+    min_y, max_y = L/4, L
     
     midpoint_x = min_x + (max_x - min_x)/2
     midpoint_y = min_y + (max_y - min_y)/2
@@ -320,7 +321,7 @@ def get_obstacle_rectangle_grid(L, nrows, ncols, x_spacing, y_spacing, offset, b
         for y in y_locs:
             x_centres.append(x)
             
-            # Handle the offset
+            # Handle the offset, apply to every other row
             if not i % 2:
                 y_centres.append(y)
             else:
@@ -330,7 +331,7 @@ def get_obstacle_rectangle_grid(L, nrows, ncols, x_spacing, y_spacing, offset, b
     shear_matrix = np.array([[1, np.tan(beta)],[0, 1]]) # Shear defined here
     grid_points = np.stack([x_centres, y_centres], axis=1) # Combine locations together to apply shear
     
-    # Apply the shear
+    # Apply the shear, if beta=0 nothing will happen
     sheared_grid = np.dot(grid_points, shear_matrix.T)
 
     # Split back into separate lists
@@ -348,20 +349,21 @@ def get_obstacle_rectangle_grid(L, nrows, ncols, x_spacing, y_spacing, offset, b
 # =============================================================================
 # Wind Functions
 # =============================================================================
-
-def wind_constant_with_noise(v0_wind, v_wind_noise, wind_theta):
+def wind_constant_with_noise(v0_wind, v_wind_noise, wind_theta, wind_theta_noise):
     '''
     Returns the x, y components of wind based on a constant angle.
     '''
-    # Add random noise to the wind
+    # Add random noise to the wind speed
     v0_wind += v_wind_noise * (np.random.rand(1) - 0.5)[0]
 
+    # Add random noise to the wind angle
+    wind_theta += wind_theta_noise * (np.random.rand(1) - 0.5)[0]
+
     # Get x, y velocity components
-    vx_wind = v0_wind * np.cos(wind_theta)
-    vy_wind = v0_wind * np.sin(wind_theta)
+    vx_wind = v0_wind* np.cos(wind_theta)
+    vy_wind = v0_wind* np.sin(wind_theta)
     
     return vx_wind, vy_wind
-
 
 def wind_dynamic(t, A_x, A_y, f):
     '''
@@ -424,7 +426,7 @@ def initialize_birds(N, L, v0, theta_start, eta, method):
         raise ValueError(f"Unknown initialisation method: {method}. Choose from 'random', 'uniform', 'v-flock'.")
 
 
-def initialize_obstacles(L, num_obstacles, nrows, ncols, shape, x_spacing, y_spacing, offset, beta):
+def initialize_obstacles(L, num_obstacles, nrows, ncols, shape, Rx, Ry, x_spacing, y_spacing, offset, beta):
     '''
     Master function to initialise obstacles and get lists of their x, y points
     '''
@@ -438,13 +440,13 @@ def initialize_obstacles(L, num_obstacles, nrows, ncols, shape, x_spacing, y_spa
         
         # Make obstacles depending on specified shape
         if shape == "rectangular":
-            x_obs, y_obs = make_rectangular_obstacle(x_centres[i], y_centres[i], num_obstacles, L1=10, L2=2)
+            x_obs, y_obs = make_rectangular_obstacle(x_centres[i], y_centres[i], num_obstacles, L1=100, L2=5)
 
         elif shape == "circular":
-            x_obs, y_obs = make_circular_obstacle(x_centres[i], y_centres[i], num_obstacles, R=2.5)
+            x_obs, y_obs = make_circular_obstacle(x_centres[i], y_centres[i], num_obstacles, R=50)
 
         elif shape == "elliptical":
-            x_obs, y_obs = make_elliptical_obstacle(x_centres[i], y_centres[i], num_obstacles, Rx=10, Ry=2)
+            x_obs, y_obs = make_elliptical_obstacle(x_centres[i], y_centres[i], num_obstacles, Rx, Ry)
 
         else:
             raise ValueError(f"Unknown initialisation shape: {shape}. Choose from 'rectangular', 'circular', 'elliptical'.")
@@ -459,7 +461,7 @@ def initialize_obstacles(L, num_obstacles, nrows, ncols, shape, x_spacing, y_spa
     return x_obstacle_list, y_obstacle_list, x_obstacle, y_obstacle
 
 
-def wind(x, y, t, v0_wind, v_wind_noise, wind_theta, A_x, A_y, k, f, method):
+def wind(x, y, t, v0_wind, v_wind_noise, wind_theta, wind_theta_noise, A_x, A_y, k, f, method):
     """
     Master function to add wind to the model, based on the specified method
 
@@ -467,7 +469,7 @@ def wind(x, y, t, v0_wind, v_wind_noise, wind_theta, A_x, A_y, k, f, method):
     """
 
     if method == "constant":
-        return wind_constant_with_noise(v0_wind, v_wind_noise, wind_theta)
+        return wind_constant_with_noise(v0_wind, v_wind_noise, wind_theta, wind_theta_noise)
 
     elif method == "dynamic":
         return wind_dynamic(t, A_x, A_y, f)

@@ -59,12 +59,13 @@ class params_default:
         self.R = 2                    # A distance over which birds can observe their neighbours, R,
         self.r_min = 0.1              # a minimum distance they would like to maintain, r.
         self.R_obs = 0.5              # Interaction radius (bird - obstacles)
-
+        
         # Migratory goal vector
         self.goal_x = 1               # X-component of common goal direction vector
         self.goal_y = 1               # Y-component of common goal direction vector
 
-        self.theta_start = np.pi / 2  # 
+        # Flock shape
+        self.theta_start = np.pi / 2  # Starting bird direction
         self.bird_method = "v-flock"  # The method of bird initialisation
 
         # -------------------------------------------------------------------------
