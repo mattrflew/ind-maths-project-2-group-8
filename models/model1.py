@@ -121,8 +121,7 @@ def update_theta(x, y, theta, Rsq, x_obstacle, y_obstacle, R_obs, eta, N, fov_an
 
             # Sum up the avoidance vectors to get the net avoidance direction
             net_avoidance_vector = np.sum(avoidance_vectors, axis=0)
-            
-            
+              
             # Get angle of avoidance
             # There were a lot of errors here
             if net_avoidance_vector.size >= 2:
