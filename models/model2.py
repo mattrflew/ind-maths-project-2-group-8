@@ -15,6 +15,8 @@ This module provides functions for the simulation of Model 2.
 from .functions import *
 from .model1 import *
 
+
+
 def shill_agents(x_bird, y_bird, x_obs_in_radius, y_obs_in_radius, x_obstacle_list, y_obstacle_list):
     '''
     This function computes the closest "shill" agent(s) positions and their
@@ -53,9 +55,9 @@ def shill_agents(x_bird, y_bird, x_obs_in_radius, y_obs_in_radius, x_obstacle_li
         y_d: Vertical position of the shill agent
     '''
 
-    # =========================================================================
+    # -------------------------------------------------------------------------
     # Step 1: Computing the shill agent points
-    # =========================================================================
+    # -------------------------------------------------------------------------
 
     # Compute distances from bird to each obstacle point within radius
     distances = np.sqrt((x_obs_in_radius - x_bird)**2 + (y_obs_in_radius - y_bird)**2)
@@ -74,9 +76,9 @@ def shill_agents(x_bird, y_bird, x_obs_in_radius, y_obs_in_radius, x_obstacle_li
     shill_locs = np.array([x_shills, y_shills])
 
 
-    # =========================================================================
+    # -------------------------------------------------------------------------
     # Step 2: Identifying two points on either side of the shill agents
-    # =========================================================================
+    # -------------------------------------------------------------------------
 
     # Storage list for perpendicular vectors
     perp_vecs = []
@@ -107,9 +109,9 @@ def shill_agents(x_bird, y_bird, x_obs_in_radius, y_obs_in_radius, x_obstacle_li
                 point_2 = (x_obs[next_idx], y_obs[next_idx])
 
 
-                # =============================================================
+                # -------------------------------------------------------------
                 # Step 3: Calculating the vector perpendicular to the line
-                # =============================================================
+                # -------------------------------------------------------------
 
                 # Unpack the coordinates of the two points
                 x_1, y_1 = point_1
@@ -127,9 +129,9 @@ def shill_agents(x_bird, y_bird, x_obs_in_radius, y_obs_in_radius, x_obstacle_li
                 perp_x /= np.sqrt(perp_x**2 + perp_y**2)
                 perp_y /= np.sqrt(perp_x**2 + perp_y**2)
 
-                # =============================================================
+                # -------------------------------------------------------------
                 # Step 4: Ensuring perpendicular vector points outward
-                # =============================================================
+                # -------------------------------------------------------------
 
                 # Carry out angle-based direction test to see if perp vector 
                 # is facing in the correct direction
@@ -171,40 +173,49 @@ def update_theta(x, y, theta, Rsq, x_obstacle, y_obstacle, x_obstacle_list, y_ob
     # Update theta based on obstacles
     for i in range(N):
         
-        # Determine if obstacles in radius
-        x_obs_in_radius, y_obs_in_radius, distances = get_obstacles_within_radius(x[i], y[i], theta_new[i], x_obstacle, y_obstacle, R_obs, fov_angle)
-
-        # Only continue if there are obstacles in radius
-        if np.any(distances):
+        # Get obstacles within radius
+        x_obs_in_radius, y_obs_in_radius, distances = get_obstacles_within_radius(
+            x[i], y[i], theta[i], x_obstacle, y_obstacle, R_obs, fov_angle
+        )
+        
+        # Check if there are obstacles within radius
+        if len(distances) > 0:
             
-            # Calculte shill agents and outward perpendicular vectors from them
-            shill_locs, perp_vecs = shill_agents(x[i], y[i], x_obs_in_radius, y_obs_in_radius, x_obstacle_list, y_obstacle_list)
-
-            # Normalise by distance (this should(?) make closer distances more important)
-            avoidance_vectors = perp_vecs / distances
-
+            # Calculate shill agents and perpendicular vectors
+            shill_locs, perp_vecs = shill_agents(
+                x[i], y[i], x_obs_in_radius, y_obs_in_radius, x_obstacle_list, y_obstacle_list
+            )
+            
+            # Compute distances between the bird and shill locations
+            differences = shill_locs - np.array([x[i], y[i]])
+            distances = np.linalg.norm(differences, axis=1)
+            
+            # Handle divide-by-zero in distances
+            distances[distances == 0] = 1e-6  # Small epsilon value
+            
+            # Compute avoidance vectors normalized by distance
+            avoidance_vectors = perp_vecs / distances[:, None]  # Ensure correct broadcasting
+            
             # Sum up the avoidance vectors to get the net avoidance direction
             net_avoidance_vector = np.sum(avoidance_vectors, axis=0)
-              
-            # Get angle of avoidance
-            # There were a lot of errors here
-            if net_avoidance_vector.size >= 2:
-                
-                # Get the angle of the net avoidance vector
+            
+            # Calculate avoidance angle only if net_avoidance_vector is valid
+            if np.linalg.norm(net_avoidance_vector) > 0:
                 avoidance_theta = np.arctan2(net_avoidance_vector[1], net_avoidance_vector[0])
-
-                # Calculate weighted average between avoidance theta and mean theta from neighbors
-                avoidance_weight = 0.5
+                
+                # Calculate a weighted average between mean theta and avoidance theta
+                avoidance_weight = 0.5  # Adjust as needed
                 theta_new[i] = (1 - avoidance_weight) * mean_theta[i] + avoidance_weight * avoidance_theta
             
             else:
-                # If that didn't work, just go to mean theta
+                # If avoidance vector is zero, fallback to mean theta
                 theta_new[i] = mean_theta[i]
-    
-        # If no obstacle, use theta from neighbours
+        
         else:
+            # If no obstacles, use mean theta
             theta_new[i] = mean_theta[i]
-         
+    
+    # Add noise to the updated theta values
     theta_new = add_noise_theta(theta_new, eta, N)
     
     return theta_new
