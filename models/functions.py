@@ -100,7 +100,7 @@ def get_clustering_coefficient(vx, vy, v0, vx_wind, vy_wind, N):
     # Expected total velocity magnitude per bird
     # v_expected = np.sqrt(v0**2 + vx_wind**2 + vy_wind**2) # doesn't work?
     
-    # Average bird speed (calculate direc)
+    # Average bird speed (calculate directly)
     v_expected = np.mean(np.sqrt(vx**2 + vy**2))
     
     # Calculate coefficient
