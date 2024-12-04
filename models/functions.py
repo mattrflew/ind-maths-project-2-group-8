@@ -12,8 +12,7 @@ model, that are not specific to the chosen model.
 # Importing Modules
 # =============================================================================
 
-# Import all intermediate and initialisation functions
-from .functions import *
+# Import all initialisation functions
 from .initialise import *
 
 # Import packages

@@ -51,9 +51,6 @@ Master functions:
 # Importing Modules
 # =============================================================================
 
-# Import all intermediate functions
-from .functions import add_noise_theta
-
 # Import packages
 import numpy as np
 
@@ -66,6 +63,14 @@ import numpy as np
 # - Their velocit (vx,vy)
 
 # The magnitudes of all birds' velocities are the same.
+
+def add_noise_theta(theta, eta, N):
+    '''
+    Update theta with a random amount of noise between -eta/2 and eta/2
+    '''
+    theta += eta * (np.random.rand(N, 1) - 0.5)
+    
+    return theta
 
 def initialize_birds_random(N, L, v0):
     '''
