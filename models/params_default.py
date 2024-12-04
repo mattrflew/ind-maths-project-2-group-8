@@ -81,7 +81,7 @@ class params_default:
         # Obstacles
         # -------------------------------------------------------------------------
         # Obstacle creation
-        self.n = 30                   # Number of points that defines the obstacle
+        self.n = 100                   # Number of points that defines the obstacle
         
         # Physical parameters
         self.diameter = 100           # Diameter of turbine

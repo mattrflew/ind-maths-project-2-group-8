@@ -46,7 +46,7 @@ def update_positions(x, y, vx, vy, dt, L):
     y += vy*dt
     
     # apply boundary conditions
-    x, y = apply_boundary_conditions(x,y,L)
+    # x, y = apply_boundary_conditions(x,y,L)
     return x, y
 
 
@@ -243,7 +243,8 @@ def run_model1(params, plot = False):
         x_spacing = params.x_spacing, 
         y_spacing = params.y_spacing, 
         offset = params.offset, 
-        beta = params.beta
+        beta = params.beta,
+        n = params.n
     )
 
     # Fetch the initial birds in the environment
