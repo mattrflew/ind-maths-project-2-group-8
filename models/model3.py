@@ -397,6 +397,7 @@ def step(
     v0_wind, 
     v_wind_noise, 
     wind_theta,
+    wind_theta_noise,
     A_x,
     A_y,
     k,
@@ -424,8 +425,8 @@ def step(
     vy_new = np.zeros(N)
     
     # Get combined wind velocity components
-    vx_wind, vy_wind = wind(x, y, t, v0_wind, v_wind_noise, wind_theta, A_x, A_y, k, f, wind_method)
-    
+    vx_wind, vy_wind = wind(x, y, t, v0_wind, v_wind_noise, wind_theta, wind_theta_noise, A_x, A_y, k, f, wind_method)
+
     # For each bird:
     for i in range(N):
         
@@ -446,6 +447,17 @@ def step(
         
         # Migrating component
         migrate_vx, migrate_vy = migratory_vel(goal_x, goal_y)
+
+        # If wind is scalar then
+        if np.isscalar(vx_wind):
+            wind_vx = vx_wind
+            wind_vy = vy_wind
+
+        # If wind is vector then
+        else:
+            wind_vx = vx_wind[i]
+            wind_vy = vy_wind[i]
+
            
         # Update velocity with limits
         vx_new[i], vy_new[i] = update_velocity(i, vx, vy, 
@@ -456,21 +468,21 @@ def step(
                                     migrate_vx, migrate_vy, 
                                     bird_speed_max, 
                                     lam_a, lam_c, lam_m, lam_o, lam_g, lam_w,
-                                    vx_wind[i], vy_wind[i])
+                                    wind_vx, wind_vy)
     
     # Update new velocities
     vx = np.array(vx_new).reshape(-1, 1)
     vy = np.array(vy_new).reshape(-1, 1)
     
-    return x, y, vx, vy
+    return x, y, vx, vy, vx_wind, vy_wind
 
 # -----------------------------------------------------------------------------
 # Run Model 3
 # -----------------------------------------------------------------------------
 
-def run_model3(params, plot=False):
+def run_model3(params, plot = False):
 
-    # If no parameters are supplied,
+    # If no other parameter class is supplied,
     if params is None:
 
         # Then use default parameters
@@ -478,19 +490,21 @@ def run_model3(params, plot=False):
 
     # Fetch the obstacles in the environment
     x_obstacle_list, y_obstacle_list, x_obstacle, y_obstacle = initialize_obstacles(
-        L = params.L , 
-        num_obstacles = params.num_obstacles, 
+        L = params.L,
+        num_obstacles = params.num_obstacles,
         nrows = params.nrows, 
         ncols = params.ncols, 
         shape = params.shape, 
-        x_spacing = params.x_spacing,
-        y_spacing = params.y_spacing,
+        Rx = params.Rx, 
+        Ry = params.Ry, 
+        x_spacing = params.x_spacing, 
+        y_spacing = params.y_spacing, 
         offset = params.offset, 
         beta = params.beta
     )
 
     # Fetch the initial birds in the environment
-    x, y, vx, vy, _ = initialize_birds(
+    x, y, vx, vy, theta = initialize_birds(
         N = params.N, 
         L = params.L, 
         v0 = params.v0, 
@@ -499,11 +513,19 @@ def run_model3(params, plot=False):
         method = params.bird_method
     )
 
-    # Set up the figure and axis
-    fig, ax = plt.subplots(figsize=(5, 5))
+    # Set up a figure
+    fig, ax = plt.subplots(figsize = (8,8))
 
-    # Initialize quiver plot
-    q = ax.quiver(x, y, vx, vy)
+    # Plot obstacle(s) - Plot the "list" to visualise the different obstaclces properly
+    for xx, yy in zip(x_obstacle_list, y_obstacle_list):
+        ax.plot(xx, yy, 'r-')
+
+    # Plot initial quivers
+    q = plt.quiver(x,y,vx,vy)
+
+    # Wind visualization
+    vx_wind, vy_wind = wind(x, y, 0, params.v0_wind, params.v_wind_noise, params.wind_theta, params.wind_theta_noise, params.A_x, params.A_y, params.k, params.f, params.wind_method)
+    wind_quiver = ax.quiver(0, 0, vx_wind.mean(), vy_wind.mean(), color='red', scale=1)
 
     # Set figure parameters
     ax.set(xlim=(0, params.L), ylim=(0, params.L))
@@ -511,59 +533,46 @@ def run_model3(params, plot=False):
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
 
-    # Plot obstacle(s) - Plot the "list" to visualise the different obstaclces properly
-    for xx, yy in zip(x_obstacle_list, y_obstacle_list):
-        ax.plot(xx, yy, 'r-')
-
-    # Wind visualization
-    vx_wind, vy_wind = wind(x, y, 0, params.v0_wind, params.v_wind_noise, params.wind_theta, params.A_x, params.A_y, params.k, params.f, params.wind_method)
-    wind_quiver = ax.quiver(0, 0, vx_wind.mean(), vy_wind.mean(), color='red', scale=1)
-
     # Metrics storage 
     dispersion_values = []
     offset_values = []
     clustering_coefficients = []
 
-    # Function to update each frame
+    # Do each step, updating the quiver and plotting the new one
     for t in range(params.Nt):
 
-        # Update bird positions and velocities
-        x, y, vx, vy = step(
-        x = x,
-        y = y,
-        vx = vx,
-        vy = vy,
-        L = params.L,
-        R_bird = params.R_bird,
-        R_min = params.r_min,
-        N = params.N,
-        dt = params.dt,
-        bird_speed_max = params.vmax,
-        lam_a = params.lam_a,
-        lam_c = params.lam_c,
-        lam_m = params.lam_m,
-        lam_g = params.lam_g,
-        lam_o = params.lam_o,
-        lam_w = params.lam_w,
-        goal_x = params.goal_x,
-        goal_y = params.goal_y,
-        x_obstacle_list = x_obstacle_list,
-        y_obstacle_list = y_obstacle_list,
-        v0_wind = params.v0_wind, 
-        v_wind_noise = params.v_wind_noise, 
-        wind_theta = params.wind_theta,
-        A_x = params.A_x,
-        A_y = params.A_y,
-        k = params.k,
-        f = params.f,
-        wind_method = params.wind_method,
-        t = t
-    )
-
-        # Append metric values
-        dispersion_values.append(calculate_dispersion(x, y))
-        offset_values.append(calculate_path_offset(x, y, params.goal_x, params.goal_y))
-        clustering_coefficients.append(get_clustering_coefficient(vx, vy, params.v0, vx_wind, vy_wind, params.N))
+        x, y, vx, vy, vx_wind, vy_wind = step(
+            x=x,
+            y=y,
+            vx=vx,
+            vy=vy,
+            L=params.L,
+            R_bird=params.R_bird,
+            R_min=params.r_min,
+            N=params.N,
+            dt=params.dt,
+            bird_speed_max=params.vmax,
+            lam_a=params.lam_a,
+            lam_c=params.lam_c,
+            lam_m=params.lam_m,
+            lam_g=params.lam_g,
+            lam_o=params.lam_o,
+            lam_w=params.lam_w,
+            goal_x=params.goal_x,
+            goal_y=params.goal_y,
+            x_obstacle_list=x_obstacle_list,
+            y_obstacle_list=y_obstacle_list,
+            v0_wind=params.v0_wind, 
+            v_wind_noise=params.v_wind_noise, 
+            wind_theta=params.wind_theta,
+            wind_theta_noise = params.wind_theta_noise,
+            A_x=params.A_x,
+            A_y=params.A_y,
+            k=params.k,
+            f=params.f,
+            wind_method = params.wind_method,
+            t=t
+        )
 
         # Plot
         if plot:
@@ -571,5 +580,10 @@ def run_model3(params, plot=False):
             wind_quiver.set_UVC(vx_wind.mean(), vy_wind.mean())
             clear_output(wait=True)
             display(fig)
+        
+        # Append metric values
+        dispersion_values.append(calculate_dispersion(x, y))
+        offset_values.append(calculate_path_offset(x, y, params.goal_x, params.goal_y))
+        clustering_coefficients.append(get_clustering_coefficient(vx, vy, params.v0, vx_wind, vy_wind, params.N))
         
         return dispersion_values, offset_values, clustering_coefficients

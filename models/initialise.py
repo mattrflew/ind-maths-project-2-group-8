@@ -353,6 +353,7 @@ def get_obstacle_rectangle_grid(L, nrows, ncols, x_spacing, y_spacing, offset, b
 # =============================================================================
 # Wind Functions
 # =============================================================================
+
 def wind_constant_with_noise(v0_wind, v_wind_noise, wind_theta, wind_theta_noise):
     '''
     Returns the x, y components of wind based on a constant angle.
