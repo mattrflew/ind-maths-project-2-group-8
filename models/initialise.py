@@ -248,6 +248,7 @@ def make_rectangular_obstacle(x_centre, y_centre, n, L1=10, L2=2):
     
     return x_points, y_points
 
+
 def make_circular_obstacle(x_centre, y_centre, n, R=2.5):
     '''
     Returns x,y points defining a circular-shaped obstacle
@@ -270,6 +271,7 @@ def make_elliptical_obstacle(x_centre, y_centre, n, Rx=10, Ry=2):
     y = y_centre + Ry*np.sin(angles)
     
     return x, y
+
 
 def get_obstacle_rectangle_grid(L, nrows, ncols, x_spacing, y_spacing, offset, beta):
     '''
@@ -360,6 +362,7 @@ def wind_constant_with_noise(v0_wind, v_wind_noise, wind_theta):
     
     return vx_wind, vy_wind
 
+
 def wind_dynamic(t, A_x, A_y, f):
     '''
     Returns the x, y components of wind as sinusoidal functions over time.
@@ -369,6 +372,7 @@ def wind_dynamic(t, A_x, A_y, f):
     
     return vx_wind, vy_wind
 
+
 def wind_spatial(x, y, A_x, A_y, k):
     '''
     Returns the x, y components of wind as functions of position with exponential decay.
@@ -377,6 +381,7 @@ def wind_spatial(x, y, A_x, A_y, k):
     vy_wind = A_y * np.exp(-k * y)
 
     return vx_wind, vy_wind
+
 
 def wind_combined(x, y, t, A_x, A_y, k, f):
     '''
@@ -418,6 +423,7 @@ def initialize_birds(N, L, v0, theta_start, eta, method):
     else:
         raise ValueError(f"Unknown initialisation method: {method}. Choose from 'random', 'uniform', 'v-flock'.")
 
+
 def initialize_obstacles(L, num_obstacles, nrows, ncols, shape, x_spacing, y_spacing, offset, beta):
     '''
     Master function to initialise obstacles and get lists of their x, y points
@@ -451,6 +457,7 @@ def initialize_obstacles(L, num_obstacles, nrows, ncols, shape, x_spacing, y_spa
     y_obstacle = np.concatenate(y_obstacle_list)
     
     return x_obstacle_list, y_obstacle_list, x_obstacle, y_obstacle
+
 
 def wind(x, y, t, v0_wind, v_wind_noise, wind_theta, A_x, A_y, k, f, method):
     """
