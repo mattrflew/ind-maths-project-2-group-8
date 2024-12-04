@@ -269,7 +269,8 @@ def run_model1(params, plot = False):
     vx_wind_list = []
     vy_wind_list = []
     clustering_coefficients = []
-
+    dispersions = []
+    
     # Do each step, updating the quiver and plotting the new one
     for i in range(params.Nt):
 
@@ -304,5 +305,9 @@ def run_model1(params, plot = False):
         vx_wind_list.append(vx_wind)    
         vy_wind_list.append(vy_wind)
         
-        # Append clustering coefficient
+        # Append metrics
+        dispersions.append(x, y)
         clustering_coefficients.append(get_clustering_coefficient(vx, vy, params.v0, vx_wind, vy_wind, params.N))
+    
+    return dispersions, clustering_coefficients
+    
