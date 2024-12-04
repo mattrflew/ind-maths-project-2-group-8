@@ -214,7 +214,7 @@ def initialize_birds_triangle(N, L, v0, theta_start, eta):
 # Obstacles are defined by:
 # - Their position (x,y) 
 
-def make_rectangular_obstacle(x_centre, y_centre, L1, L2, n=25):
+def make_rectangular_obstacle(x_centre, y_centre, n, L1=10, L2=2):
     '''
     Returns x,y points defining a rectangular-shaped obstacle
     '''
@@ -255,7 +255,7 @@ def make_rectangular_obstacle(x_centre, y_centre, L1, L2, n=25):
     
     return x_points, y_points
 
-def make_circular_obstacle(x_centre, y_centre, R, n=20):
+def make_circular_obstacle(x_centre, y_centre, n, R=2.5):
     '''
     Returns x,y points defining a circular-shaped obstacle
     '''
@@ -267,7 +267,7 @@ def make_circular_obstacle(x_centre, y_centre, R, n=20):
     return x, y
 
 
-def make_elliptical_obstacle(x_centre, y_centre, Rx, Ry, n=20):
+def make_elliptical_obstacle(x_centre, y_centre, n, Rx=10, Ry=2):
     '''
     Returns x,y points defining a elliptical-shaped obstacle
     '''
@@ -439,13 +439,13 @@ def initialize_obstacles(L, num_obstacles, nrows, ncols, shape, x_spacing, y_spa
         
         # Make obstacles depending on specified shape
         if shape == "rectangular":
-            x_obs, y_obs = make_rectangular_obstacle(x_centre, y_centre, L1, L2, n=25)
+            x_obs, y_obs = make_rectangular_obstacle(x_centres[i], y_centres[i], num_obstacles, L1=10, L2=2)
 
         elif shape == "circular":
-            x_obs, y_obs = make_circular_obstacle(x_centre, y_centre, R, n=20)
+            x_obs, y_obs = make_circular_obstacle(x_centres[i], y_centres[i], num_obstacles, R=2.5)
 
         elif shape == "elliptical":
-            x_obs, y_obs = make_elliptical_obstacle(x_centre, y_centre, Rx, Ry, n=20)
+            x_obs, y_obs = make_elliptical_obstacle(x_centres[i], y_centres[i], num_obstacles, Rx=10, Ry=2)
 
         else:
             raise ValueError(f"Unknown initialisation shape: {shape}. Choose from 'rectangular', 'circular', 'elliptical'.")

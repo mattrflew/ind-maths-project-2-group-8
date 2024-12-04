@@ -12,8 +12,8 @@ This module provides functions for the simulation of Model 3.
 # =============================================================================
 
 # Import all intermediate and initialisation functions
-from functions import *
-from initialise import *
+from .functions import *
+from .initialise import *
 from params_default import params_default
 
 # Import packages
