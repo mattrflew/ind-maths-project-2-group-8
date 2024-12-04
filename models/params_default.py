@@ -35,25 +35,28 @@ class params_default:
     """
 
     def __init__(self):
-
+        
+        # Bird speed
+        self.v0 = 17.38               # Speed of birds (constant)
+        
         # -------------------------------------------------------------------------
         # Time & Space
         # -------------------------------------------------------------------------
+        self.L = 7000                 # Size of box (L*L = Area of a wind farm)
         self.dt = 0.2                 # Time step
-        self.Nt = 100                 # No. of time steps
-        self.L = 10                   # Size of box (Area of a wind farm)
+        self.T = self.L/self.v0       # Minimum simulation length (seconds)
+        self.Nt = int(self.T/self.dt) # No. of time steps
 
         # -------------------------------------------------------------------------
         # Birds
         # -------------------------------------------------------------------------
-        self.v0 = 1.0                 # velocity of birds (constant)
-        self.vmax = 2.0               # Maximum velocity 
+        self.vmax = 30.0              # Maximum velocity (?)
         self.eta = 0.5                # maximum random fluctuation in angle (in radians)
-        self.R_bird = 1               # Interaction radius (bird-bird)
+        self.R_bird = 2               # Interaction radius (bird-bird)
         self.Rsq = self.R_bird**2     # Square of the interaction radius
-        self.N = 25                   # number of birds
+        self.N = 250                  # number of birds
         self.fov_angle = np.pi        # Field of View of birds
-        self.R = 1                    # A distance over which birds can observe their neighbours, R,
+        self.R = 2                    # A distance over which birds can observe their neighbours, R,
         self.r_min = 0.1              # a minimum distance they would like to maintain, r.
         self.R_obs = 0.5              # Interaction radius (bird - obstacles)
 
@@ -77,22 +80,41 @@ class params_default:
         # -------------------------------------------------------------------------
         # Obstacles
         # -------------------------------------------------------------------------
-        self.num_obstacles = 8
-        self.nrows = 4
-        self.ncols = 2
-        self.shape = "elliptical"
-        self.x_spacing = 15
-        self.y_spacing = 10
-        self.offset = 5
-        self.beta = np.radians(0)
+        # Obstacle creation
+        self.n = 30                                                 # Number of points that defines the obstacle
+        
+        # Physical parameters
+        self.diameter = 100                                         # Diameter of turbine
+        self.width = 10                                             # Width of turbine at widest point (including nacelle)
+        self.shape = "elliptical"                                   # Default shape is elliptical       
+        self.Rx = self.diameter/2                                   # Elliptical radius in x direction
+        self.Ry = self.width/2                                      # Elliptical radius in y direction
+        
+        # Grid layout
+        self.nrows = 3                                              # Number of rows in grid
+        self.ncols = 10                                             # Number of columns in grid
+        self.num_obstacles = self.nrows*self.ncols                  # Total number of obstacles in grid
+
+        # Spacing of grid
+        self.rotor_spacing_side = 5                                 # Num diameters to the side between turbines
+        self.rotor_spacing_behind = 9                               # Num diameters behind between turbines
+        self.x_spacing = self.rotor_spacing_side*self.diameter      # Spacing to the side between turbines
+        self.y_spacing = self.rotor_spacing_behind*self.diameter    # Spacing behind between the turbines
+        
+        # By having these at 0, it is a rectangular grid
+        self.offset = 0                                             # Offset in grid layout, applied to every other row
+        self.beta = np.radians(0)                                   # Shear amount in grid layout
+        
 
         # -------------------------------------------------------------------------
         # Wind
         # -------------------------------------------------------------------------
-        self.v0_wind = 0.5                           # Velocity of wind (constant)
-        self.v_wind_noise = 0.1                      # Maximum random fluctuation in wind velocity (in same units as v0_wind)
-        self.wind_theta = 0                          # Wind direction 
-        self.wind_method = "combined"                # Options: "constant", "dynamic", "spatial", "combined"
+        self.v0_wind = 0                           # Velocity of wind (constant)
+        self.v_wind_noise = 0                      # Maximum random fluctuation in wind velocity (in same units as v0_wind)
+        self.wind_theta = np.pi/2                  # Wind direction (in radians)
+        self.wind_theta_noise = 0                  # Maximum random fluctuation in wind angle (in radians)
+        
+        self.wind_method = "constant"                # Options: "constant", "dynamic", "spatial", "combined"
 
         self.f = 0.05                                # Frequency of wind variation
         self.A_x = 1.0                               # Amplitude of wind in x direction
