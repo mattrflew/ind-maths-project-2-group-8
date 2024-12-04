@@ -61,11 +61,11 @@ class params_default:
         self.R_obs = 0.5              # Interaction radius (bird - obstacles)
 
         # Migratory goal vector
-        self.goal_x = 1          
-        self.goal_y = 1
+        self.goal_x = 1               # X-component of common goal direction vector
+        self.goal_y = 1               # Y-component of common goal direction vector
 
-        self.theta_start = np.pi / 2 
-        self.bird_method = "v-flock"
+        self.theta_start = np.pi / 2  # 
+        self.bird_method = "v-flock"  # The method of bird initialisation
 
         # -------------------------------------------------------------------------
         # 'Mixing' parameters
@@ -81,19 +81,21 @@ class params_default:
         # Obstacles
         # -------------------------------------------------------------------------
         # Obstacle creation
-        self.n = 30                                                 # Number of points that defines the obstacle
+        self.n = 30                   # Number of points that defines the obstacle
         
         # Physical parameters
-        self.diameter = 100                                         # Diameter of turbine
-        self.width = 10                                             # Width of turbine at widest point (including nacelle)
-        self.shape = "elliptical"                                   # Default shape is elliptical       
-        self.Rx = self.diameter/2                                   # Elliptical radius in x direction
-        self.Ry = self.width/2                                      # Elliptical radius in y direction
+        self.diameter = 100           # Diameter of turbine
+        self.width = 10               # Width of turbine at widest point (including nacelle)
+        self.shape = "elliptical"     # Default shape is elliptical       
+        self.Rx = self.diameter/2     # Elliptical radius in x direction
+        self.Ry = self.width/2        # Elliptical radius in y direction
         
         # Grid layout
-        self.nrows = 3                                              # Number of rows in grid
-        self.ncols = 10                                             # Number of columns in grid
-        self.num_obstacles = self.nrows*self.ncols                  # Total number of obstacles in grid
+        self.nrows = 3                # Number of rows in grid
+        self.ncols = 10               # Number of columns in grid
+        self.num_obstacles = (        # Total number of obstacles in grid
+            self.nrows * self.ncols
+        )      
 
         # Spacing of grid
         self.rotor_spacing_side = 5                                 # Num diameters to the side between turbines
@@ -113,10 +115,8 @@ class params_default:
         self.v_wind_noise = 0                      # Maximum random fluctuation in wind velocity (in same units as v0_wind)
         self.wind_theta = np.pi/2                  # Wind direction (in radians)
         self.wind_theta_noise = 0                  # Maximum random fluctuation in wind angle (in radians)
-        
-        self.wind_method = "constant"                # Options: "constant", "dynamic", "spatial", "combined"
-
-        self.f = 0.05                                # Frequency of wind variation
-        self.A_x = 1.0                               # Amplitude of wind in x direction
-        self.A_y = 1.0                               # Amplitude of wind in y direction
-        self.k = 0.1                                 # Decay rate for spatial wind variation
+        self.wind_method = "constant"              # Options: "constant", "dynamic", "spatial", "combined"
+        self.f = 0.05                              # Frequency of wind variation
+        self.A_x = 1.0                             # Amplitude of wind in x direction
+        self.A_y = 1.0                             # Amplitude of wind in y direction
+        self.k = 0.1                               # Decay rate for spatial wind variation
