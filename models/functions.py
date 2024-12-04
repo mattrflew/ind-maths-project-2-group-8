@@ -107,3 +107,13 @@ def get_clustering_coefficient(vx, vy, v0, vx_wind, vy_wind, N):
     clustering_coefficient = (1/(N*v_expected))*sum_terms
     
     return clustering_coefficient
+
+def return_metric_statistics(dispersion_values, offset_values, clustering_coefficients):
+    '''
+    Returns the averaged metrics (i.e. results of the simulation)
+    '''
+    avg_dispersion = np.mean(dispersion_values)
+    avg_offset = np.mean(offset_values)
+    avg_clustering_coefficient = np.mean(clustering_coefficients)
+    
+    return avg_dispersion, avg_offset, avg_clustering_coefficient
