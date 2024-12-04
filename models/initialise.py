@@ -464,8 +464,6 @@ def initialize_obstacles(L, num_obstacles, nrows, ncols, shape, Rx, Ry, x_spacin
     x_obstacle = np.concatenate(x_obstacle_list)
     y_obstacle = np.concatenate(y_obstacle_list)
     
-    print(x_obs, y_obs)
-    
     return x_obstacle_list, y_obstacle_list, x_obstacle, y_obstacle
 
 
