@@ -374,7 +374,35 @@ def update_velocity(i, vx, vy,
 # Update steps
 # -----------------------------------------------------------------------------
 
-def step(x, y, vx, vy, L, R_bird, R_min, N, dt, bird_speed_max, lam_a, lam_c, lam_m, lam_o, lam_g, lam_w, goal_x, goal_y, t):
+
+def step(
+    x,
+    y,
+    vx,
+    vy,
+    L,
+    R_bird,
+    R_min,
+    N,
+    dt,
+    bird_speed_max,
+    lam_a,
+    lam_c,
+    lam_m,
+    lam_g,
+    lam_o,
+    lam_w,
+    goal_x,
+    goal_y,
+    x_obstacle_list,
+    y_obstacle_list,
+    A_x,
+    A_y,
+    k,
+    f,
+    t
+):
+    
     '''
     Compute a step in the dynamics:
     - update the positions
@@ -513,10 +541,18 @@ def run_model3(params, plot=False):
             lam_c = params.lam_c, 
             lam_m = params.lam_m, 
             lam_g = params.lam_g, 
+            lam_o = params.lam_o,
+            lam_w = params.lam_w,
             goal_x = params.goal_x, 
-            goal_y = params.goal_y
+            goal_y = params.goal_y,
             x_obstacle_list = x_obstacle_list, 
-            y_obstacle_list = y_obstacle_list)
+            y_obstacle_list = y_obstacle_list,
+            A_x = params.A_x,
+            A_y = params.A_y,
+            k = params.k,
+            f = params.f,
+            t = t
+        )
 
         vx_wind, vy_wind = wind_combined(x, y, t * params.dt, params.A_x, params.A_y, params.k, params.f)
 

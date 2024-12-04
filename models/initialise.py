@@ -406,7 +406,7 @@ def wind_combined(x, y, t, A_x, A_y, k, f):
 # Master Functions
 # =============================================================================
 
-def initialize_birds(N, L, v0, theta_start, eta, method="v-flock"):
+def initialize_birds(N, L, v0, theta_start, eta, method):
     """
     Master function to initialise birds based on the specified method
 
@@ -425,7 +425,7 @@ def initialize_birds(N, L, v0, theta_start, eta, method="v-flock"):
     else:
         raise ValueError(f"Unknown initialisation method: {method}. Choose from 'random', 'uniform', 'v-flock'.")
 
-def initialize_obstacles(L, num_obstacles, nrows, ncols, shape="elliptical", x_spacing=15, y_spacing=10, offset=5, beta=np.radians(0)):
+def initialize_obstacles(L, num_obstacles, nrows, ncols, shape, x_spacing, y_spacing, offset, beta):
     '''
     Master function to initialise obstacles and get lists of their x, y points
     '''
@@ -438,17 +438,17 @@ def initialize_obstacles(L, num_obstacles, nrows, ncols, shape="elliptical", x_s
     for i in range(num_obstacles):
         
         # Make obstacles depending on specified shape
-        if method == "rectangular":
+        if shape == "rectangular":
             x_obs, y_obs = make_rectangular_obstacle(x_centre, y_centre, L1, L2, n=25)
 
-        elif method == "circular":
+        elif shape == "circular":
             x_obs, y_obs = make_circular_obstacle(x_centre, y_centre, R, n=20)
 
-        elif method == "elliptical":
+        elif shape == "elliptical":
             x_obs, y_obs = make_elliptical_obstacle(x_centre, y_centre, Rx, Ry, n=20)
 
         else:
-            raise ValueError(f"Unknown initialisation method: {method}. Choose from 'random', 'uniform', 'v-flock'.")
+            raise ValueError(f"Unknown initialisation shape: {shape}. Choose from 'rectangular', 'circular', 'elliptical'.")
 
         x_obstacle_list.append(x_obs)
         y_obstacle_list.append(y_obs)
@@ -459,7 +459,7 @@ def initialize_obstacles(L, num_obstacles, nrows, ncols, shape="elliptical", x_s
     
     return x_obstacle_list, y_obstacle_list, x_obstacle, y_obstacle
 
-def wind(x, y, t, A_x, A_y, k, f, method="combined"):
+def wind(x, y, t, v0_wind, v_wind_noise, wind_theta, A_x, A_y, k, f, method):
     """
     Master function to add wind to the model, based on the specified method
 
