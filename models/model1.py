@@ -201,7 +201,7 @@ def step(x, y, vx, vy, x_obstacle, y_obstacle, L, v0, theta, Rsq, R_obs,  eta, f
     #vx, vy = update_velocities(v0, theta, vx_wind, vy_wind, v_wind_max=10, alpha=0.5)
     vx, vy = update_velocities_original(v0, theta, vx_wind, vy_wind)
     
-    return x, y, vx, vy, vx_wind, vy_wind
+    return x, y, vx, vy, vx_wind, vy_wind, theta
 
 
 
@@ -273,7 +273,7 @@ def run_model1(params, plot = False):
     # Do each step, updating the quiver and plotting the new one
     for i in range(params.Nt):
 
-        x, y, vx, vy, vx_wind, vy_wind = step(
+        x, y, vx, vy, vx_wind, vy_wind, theta = step(
             x = x, 
             y = y, 
             vx = vx, 
