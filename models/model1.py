@@ -155,8 +155,6 @@ def update_velocities_original(v0, theta, vx_wind, vy_wind):
     '''
     vx = v0 * np.cos(theta) + vx_wind
     vy = v0 * np.sin(theta) + vy_wind
-
-
     # print(np.sqrt(vx**2 + vy**2))
     
     return vx, vy
@@ -201,7 +199,7 @@ def step(x, y, vx, vy, x_obstacle, y_obstacle, L, v0, theta, Rsq, R_obs,  eta, f
     
     vx_wind, vy_wind = wind_constant_with_noise(v0_wind, v_wind_noise, wind_theta, wind_theta_noise)
     
-    # vx, vy = update_velocities(v0, theta, vx_wind, vy_wind, v_wind_max=10, alpha=0.5)
+    #vx, vy = update_velocities(v0, theta, vx_wind, vy_wind, v_wind_max=10, alpha=0.5)
     vx, vy = update_velocities_original(v0, theta, vx_wind, vy_wind)
     
     return x, y, vx, vy, vx_wind, vy_wind
