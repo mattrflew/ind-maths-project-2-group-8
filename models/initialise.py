@@ -124,7 +124,6 @@ def initialize_birds_square(N, L, v0, theta_start, eta):
     # Add noise
     theta = add_noise_theta(theta, eta, N)
     
-    
     # Bird velocities
     vx = v0 * np.cos(theta)
     vy = v0 * np.sin(theta)
