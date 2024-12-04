@@ -88,3 +88,22 @@ def calculate_path_offset(x, y, goal_x, goal_y):
     center_x, center_y = np.mean(x), np.mean(y)
     offset = np.sqrt((center_x - goal_x)**2 + (center_y - goal_y)**2)
     return offset
+
+def get_clustering_coefficient(vx, vy, v0, vx_wind, vy_wind, N):
+    
+    # Sum the vx and vy components (with wind included)
+    sum_terms_x = np.sum(vx)
+    sum_terms_y = np.sum(vy)
+    sum_terms = np.linalg.norm([sum_terms_x, sum_terms_y])
+    
+    # Get the expected v, v0 + v_wind
+    # Expected total velocity magnitude per bird
+    # v_expected = np.sqrt(v0**2 + vx_wind**2 + vy_wind**2) # doesn't work?
+    
+    # Average bird speed (calculate direc)
+    v_expected = np.mean(np.sqrt(vx**2 + vy**2))
+    
+    # Calculate coefficient
+    clustering_coefficient = (1/(N*v_expected))*sum_terms
+    
+    return clustering_coefficient
