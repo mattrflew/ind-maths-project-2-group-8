@@ -11,8 +11,15 @@ This module provides functions for the simulation of Model 1.
 # Importing Modules
 # =============================================================================
 
-# Import all intermediate functions
-from functions import *
+# Import all intermediate and initialisation functions
+from .functions import *
+from .initialise import *
+from .params_default import params_default
+
+# Import packages
+import numpy as np
+import matplotlib.pyplot as plt
+from IPython.display import display, clear_output
 
 # =============================================================================
 # Model 1
@@ -26,6 +33,7 @@ def apply_boundary_conditions(x, y, L):
     x = x % L
     y = y % L
     return x, y
+
 
 def update_positions(x, y, vx, vy, dt, L):
     '''
@@ -41,6 +49,7 @@ def update_positions(x, y, vx, vy, dt, L):
     x, y = apply_boundary_conditions(x,y,L)
     return x, y
 
+
 def get_mean_theta_neighbours(x, y, theta, Rsq, N):
     '''
     Compute the local average direction in a circle of radius R around
@@ -55,13 +64,35 @@ def get_mean_theta_neighbours(x, y, theta, Rsq, N):
     
     return mean_theta
 
-def add_noise_theta(theta, eta, N):
-    '''
-    Update theta with a random amount of noise between -eta/2 and eta/2
-    '''
-    theta += eta * (np.random.rand(N, 1) - 0.5)
+def get_obstacles_within_radius(x_bird, y_bird, theta_bird, x_obstacle, y_obstacle, R_obs, fov_angle):
     
-    return theta
+    # Determine if obstacle is in radius
+    distances_to_obstacles = np.sqrt((x_obstacle - x_bird) ** 2 + (y_obstacle - y_bird)**2)
+    is_in_radius = distances_to_obstacles <= R_obs
+    
+    # Select only object in radius
+    x_obs_in_radius = x_obstacle[is_in_radius]
+    y_obs_in_radius = y_obstacle[is_in_radius]
+    distances = distances_to_obstacles[is_in_radius]
+    
+    # Determine if obstacle is in FOV
+    
+    # Calculate angle to the obstacle    
+    delta_x = x_obs_in_radius - x_bird
+    delta_y = y_obs_in_radius - y_bird
+    angles_to_obstacles = np.arctan2(delta_y, delta_x)
+    
+    # Difference between obstacle and current direction of bird
+    angle_diff = np.abs(angles_to_obstacles - theta_bird)
+    
+    # Filter by field of view
+    is_in_fov = angle_diff <= fov_angle
+    x_obs_in_radius = x_obs_in_radius[is_in_fov]
+    y_obs_in_radius = y_obs_in_radius[is_in_fov]
+    distances = distances[is_in_fov]
+    
+    return x_obs_in_radius, y_obs_in_radius, distances
+
 
 def update_theta(x, y, theta, Rsq, x_obstacle, y_obstacle, R_obs, eta, N, fov_angle):
     '''
@@ -100,7 +131,7 @@ def update_theta(x, y, theta, Rsq, x_obstacle, y_obstacle, R_obs, eta, N, fov_an
                 avoidance_theta = np.arctan2(net_avoidance_vector[1], net_avoidance_vector[0])
 
                 # Calculate weighted average between avoidance theta and mean theta from neighbors
-                avoidance_weight = 0.9
+                avoidance_weight = 0.5
                 theta_new[i] = (1 - avoidance_weight) * mean_theta[i] + avoidance_weight * avoidance_theta
             
             else:
@@ -117,16 +148,49 @@ def update_theta(x, y, theta, Rsq, x_obstacle, y_obstacle, R_obs, eta, N, fov_an
     
     return theta_new
 
-def update_velocities(v0, theta):
+
+def update_velocities_original(v0, theta, vx_wind, vy_wind):
     '''
     Update the velocities given theta, assuming a constant speed v0
     '''
-    vx = v0 * np.cos(theta)
-    vy = v0 * np.sin(theta)
+    vx = v0 * np.cos(theta) + vx_wind
+    vy = v0 * np.sin(theta) + vy_wind
 
+
+    # print(np.sqrt(vx**2 + vy**2))
+    
     return vx, vy
 
-def step(x, y, vx, vy, theta, Rsq, x_obstacle, y_obstacle, eta, fov_angle, N, dt):
+
+def update_velocities(v0, theta, vx_wind, vy_wind, v_wind_max, alpha=0.5):
+    '''
+    Update the velocities given theta, assuming a constant speed v0 and wind.
+    Account for the fact that a bird will reduce effort with tailwind, alpha
+    
+    Adjusts a bird's v0 based on how much tailwind it observes, relative to a max tailwind.
+    '''
+    # Bird direction (unit vector based on theta)
+    x_dir = np.cos(theta)
+    y_dir = np.sin(theta)
+    
+    # Determine wind amount along path
+    wind_along_path = np.maximum(0, vx_wind * x_dir + vy_wind * y_dir)  # Tailwind only, don't consider negatives
+
+    # Adjust bird's airspeed for tailwind
+    adjusted_v0 = v0 * (1 - alpha * (wind_along_path / v_wind_max))
+    adjusted_v0 = np.maximum(0, adjusted_v0)  # Ensure non-negative airspeed
+    
+    # Update velocities (groundspeed)
+    vx = adjusted_v0 * np.cos(theta) + vx_wind
+    vy = adjusted_v0 * np.sin(theta) + vy_wind
+    
+    # print(np.sqrt(vx**2 + vy**2))
+    
+    return vx, vy
+
+
+
+def step(x, y, vx, vy, x_obstacle, y_obstacle, L, v0, theta, Rsq, R_obs,  eta, fov_angle, N, dt, v0_wind, v_wind_noise, wind_theta, wind_theta_noise):
     '''
     Compute a step in the dynamics:
     - update the positions
@@ -134,9 +198,15 @@ def step(x, y, vx, vy, theta, Rsq, x_obstacle, y_obstacle, eta, fov_angle, N, dt
     '''
     x, y = update_positions(x, y, vx, vy, dt, L)
     theta = update_theta(x, y, theta, Rsq, x_obstacle, y_obstacle, R_obs, eta, N, fov_angle)
-    vx, vy = update_velocities(v0, theta)
     
-    return x, y, vx, vy
+    vx_wind, vy_wind = wind_constant_with_noise(v0_wind, v_wind_noise, wind_theta, wind_theta_noise)
+    
+    # vx, vy = update_velocities(v0, theta, vx_wind, vy_wind, v_wind_max=10, alpha=0.5)
+    vx, vy = update_velocities_original(v0, theta, vx_wind, vy_wind)
+    
+    return x, y, vx, vy, vx_wind, vy_wind
+
+
 
 def update_quiver(q,x,y,vx,vy):
     '''
@@ -148,55 +218,92 @@ def update_quiver(q,x,y,vx,vy):
     
     return q
 
-def model1_plot():
+
+def run_model1(params, plot = False):
+
+    # If no other parameter class is supplied,
+    if params is None:
+
+        # Then use default parameters
+        params = params_default() 
+
+    # Fetch the obstacles in the environment
+    x_obstacle_list, y_obstacle_list, x_obstacle, y_obstacle = initialize_obstacles(
+        L = params.L , 
+        num_obstacles = params.num_obstacles, 
+        nrows = params.nrows, 
+        ncols = params.ncols, 
+        shape = params.shape, 
+        x_spacing = params.x_spacing,
+        y_spacing = params.y_spacing,
+        offset = params.offset, 
+        beta = params.beta
+    )
+
+    # Fetch the initial birds in the environment
+    x, y, vx, vy, _ = initialize_birds(
+        N = params.N, 
+        L = params.L, 
+        v0 = params.v0, 
+        theta_start = params.theta_start, 
+        eta = params.eta,
+        method = params.bird_method
+    )
 
     # Set up a figure
     fig, ax = plt.subplots(figsize = (8,8))
-
-    # Get the obstacle(s) coordinates
-    num_obstacles = 4
-    x_obstacle_list = []
-    y_obstacle_list = []
-
-    x_centres, y_centres = get_obstacle_centre_grid(L, num_obstacles, nrows=2, ncols=2)
-    # x_centres = [2.5, 7.5, 2.5, 7.5]
-    # y_centres = [2.5, 2.5, 7.5, 7.5]
-
-    for i in range(num_obstacles):
-        x_obs, y_obs = make_circular_obstacle(x_centres[i], y_centres[i], 0.25)
-
-        # x_obs, y_obs = make_rectangular_obstacle(x_centres[i], y_centres[i], 1, 0.2)
-        # make_rectangular_obstacle(x_centre, y_centre, L1, L2, n=25)
-
-        x_obstacle_list.append(x_obs)
-        y_obstacle_list.append(y_obs)
-
-    # Concatenate lists for analysis
-    x_obstacle = np.concatenate(x_obstacle_list)
-    y_obstacle = np.concatenate(y_obstacle_list)
-
-    # x_obstacle, y_obstacle = make_rectangular_obstacle(L//2, L//2, 0.5, 0.5)
 
     # Plot obstacle(s) - Plot the "list" to visualise the different obstaclces properly
     for xx, yy in zip(x_obstacle_list, y_obstacle_list):
         ax.plot(xx, yy, 'r-')
 
-    # Get the initial configuration
-    x, y, vx, vy, theta = initialize_birds_random(N, L)
-
     # Plot initial quivers
     q = plt.quiver(x,y,vx,vy)
 
     # Set figure parameters
-    ax.set(xlim=(0, L), ylim=(0, L))
+    ax.set(xlim=(0, params.L), ylim=(0, params.L))
     ax.set_aspect('equal')
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
 
+    # Initilise lists to plot later
+    vx_wind_list = []
+    vy_wind_list = []
+    clustering_coefficients = []
+
     # Do each step, updating the quiver and plotting the new one
-    for i in range(Nt):
-        # print(i)
-        x, y, vx, vy = step(x, y, vx, vy, theta, Rsq, x_obstacle, y_obstacle, eta, fov_angle, N, dt)
-        q = update_quiver(q, x, y, vx, vy)
-        clear_output(wait=True)
-        display(fig)
+    for i in range(params.Nt):
+
+        x, y, vx, vy, vx_wind, vy_wind = step(
+            x = x, 
+            y = y, 
+            vx = vx, 
+            vy = vy, 
+            x_obstacle = x_obstacle, 
+            y_obstacle = y_obstacle, 
+            L = params.L, 
+            v0 = params.v0, 
+            theta = params.theta, 
+            Rsq = params.Rsq, 
+            R_obs = params.R_obs,  
+            eta = params.eta, 
+            fov_angle = params.fov_angle, 
+            N = params.N, 
+            dt = params.dt, 
+            v0_wind = params.v0_wind, 
+            v_wind_noise = params.v_wind_noise, 
+            wind_theta = params.wind_theta, 
+            wind_theta_noise = params.wind_theta_noise
+        )
+
+        if plot:
+            q = update_quiver(q, x, y, vx, vy)
+            clear_output(wait=True)
+            display(fig)
+        
+        # Append wind information
+        vx_wind_list.append(vx_wind)    
+        vy_wind_list.append(vy_wind)
+        
+        # Append clustering coefficient
+        clustering_coefficients.append(get_clustering_coefficient(vx, vy, params.v0, vx_wind, vy_wind, params.N))

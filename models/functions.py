@@ -107,3 +107,4 @@ def get_clustering_coefficient(vx, vy, v0, vx_wind, vy_wind, N):
     clustering_coefficient = (1/(N*v_expected))*sum_terms
     
     return clustering_coefficient
+
