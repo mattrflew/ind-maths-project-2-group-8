@@ -229,13 +229,15 @@ def run_model1(params, plot = False):
 
     # Fetch the obstacles in the environment
     x_obstacle_list, y_obstacle_list, x_obstacle, y_obstacle = initialize_obstacles(
-        L = params.L , 
-        num_obstacles = params.num_obstacles, 
+        L = params.L,
+        num_obstacles = params.num_obstacles,
         nrows = params.nrows, 
         ncols = params.ncols, 
         shape = params.shape, 
-        x_spacing = params.x_spacing,
-        y_spacing = params.y_spacing,
+        Rx = params.Rx, 
+        Ry = params.Ry, 
+        x_spacing = params.x_spacing, 
+        y_spacing = params.y_spacing, 
         offset = params.offset, 
         beta = params.beta
     )
