@@ -494,7 +494,7 @@ def run_model3(params, plot=False):
         v0 = params.v0, 
         theta_start = params.theta_start, 
         eta = params.eta,
-        method = params.method
+        method = params.bird_method
     )
 
     # Set up the figure and axis
