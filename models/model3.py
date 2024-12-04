@@ -516,7 +516,7 @@ def run_model3(params, plot=False):
         ax.plot(xx, yy, 'r-')
 
     # Wind visualization
-    vx_wind, vy_wind = wind(x, y, t, params.v0_wind, params.v_wind_noise, params.wind_theta, params.A_x, params.A_y, params.k, params.f, params.wind_method)
+    vx_wind, vy_wind = wind(x, y, 0, params.v0_wind, params.v_wind_noise, params.wind_theta, params.A_x, params.A_y, params.k, params.f, params.wind_method)
     wind_quiver = ax.quiver(0, 0, vx_wind.mean(), vy_wind.mean(), color='red', scale=1)
 
     # Metrics storage 
