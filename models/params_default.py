@@ -52,7 +52,7 @@ class params_default:
         # -------------------------------------------------------------------------
         self.vmax = 30.0              # Maximum velocity (?)
         self.eta = 0.5                # maximum random fluctuation in angle (in radians)
-        self.R_bird = 2               # Interaction radius (bird-bird)
+        self.R_bird = 50              # Interaction radius (bird-bird)
         self.Rsq = self.R_bird**2     # Square of the interaction radius
         self.N = 250                  # number of birds
         self.fov_angle = np.pi        # Field of View of birds
