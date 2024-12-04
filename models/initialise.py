@@ -348,20 +348,21 @@ def get_obstacle_rectangle_grid(L, nrows, ncols, x_spacing, y_spacing, offset, b
 # =============================================================================
 # Wind Functions
 # =============================================================================
-
-def wind_constant_with_noise(v0_wind, v_wind_noise, wind_theta):
+def wind_constant_with_noise(v0_wind, v_wind_noise, wind_theta, wind_theta_noise):
     '''
     Returns the x, y components of wind based on a constant angle.
     '''
-    # Add random noise to the wind
+    # Add random noise to the wind speed
     v0_wind += v_wind_noise * (np.random.rand(1) - 0.5)[0]
 
+    # Add random noise to the wind angle
+    wind_theta += wind_theta_noise * (np.random.rand(1) - 0.5)[0]
+
     # Get x, y velocity components
-    vx_wind = v0_wind * np.cos(wind_theta)
-    vy_wind = v0_wind * np.sin(wind_theta)
+    vx_wind = v0_wind* np.cos(wind_theta)
+    vy_wind = v0_wind* np.sin(wind_theta)
     
     return vx_wind, vy_wind
-
 
 def wind_dynamic(t, A_x, A_y, f):
     '''
@@ -459,7 +460,7 @@ def initialize_obstacles(L, num_obstacles, nrows, ncols, shape, x_spacing, y_spa
     return x_obstacle_list, y_obstacle_list, x_obstacle, y_obstacle
 
 
-def wind(x, y, t, v0_wind, v_wind_noise, wind_theta, A_x, A_y, k, f, method):
+def wind(x, y, t, v0_wind, v_wind_noise, wind_theta, wind_theta_noise, A_x, A_y, k, f, method):
     """
     Master function to add wind to the model, based on the specified method
 
@@ -467,7 +468,7 @@ def wind(x, y, t, v0_wind, v_wind_noise, wind_theta, A_x, A_y, k, f, method):
     """
 
     if method == "constant":
-        return wind_constant_with_noise(v0_wind, v_wind_noise, wind_theta)
+        return wind_constant_with_noise(v0_wind, v_wind_noise, wind_theta, wind_theta_noise)
 
     elif method == "dynamic":
         return wind_dynamic(t, A_x, A_y, f)
