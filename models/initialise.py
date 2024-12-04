@@ -52,7 +52,7 @@ Master functions:
 # =============================================================================
 
 # Import all intermediate functions
-from functions import *
+from .functions import *
 
 import importlib
 import matplotlib.pyplot as plt
