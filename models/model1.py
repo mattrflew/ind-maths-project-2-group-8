@@ -25,14 +25,6 @@ from IPython.display import display, clear_output
 # Model 1
 # =============================================================================
 
-def add_noise_theta(theta, eta, N):
-    '''
-    Update theta with a random amount of noise between -eta/2 and eta/2
-    '''
-    theta += eta * (np.random.rand(N, 1) - 0.5)
-    
-    return theta
-
 def apply_boundary_conditions(x, y, L):
     '''
     Apply periodic boundary conditions
