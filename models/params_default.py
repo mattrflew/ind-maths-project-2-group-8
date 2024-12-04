@@ -60,7 +60,7 @@ class params_default:
         self.R_obs = 0.5              # Interaction radius (bird - obstacles)
         
         # Migratory goal vector
-        self.goal_x = 1               # X-component of common goal direction vector
+        self.goal_x = 0               # X-component of common goal direction vector
         self.goal_y = 1               # Y-component of common goal direction vector
 
         # Flock shape
