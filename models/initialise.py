@@ -348,6 +348,7 @@ def get_obstacle_rectangle_grid(L, nrows, ncols, x_spacing, y_spacing, offset, b
     
     # Overwrite the variables to return, note that if beta=0 then x_sheared is the same as x_centres, y_sheared is the same as y_centres
     x_centres, y_centres = x_sheared, y_sheared
+    
     return x_centres, y_centres
 
 # =============================================================================
@@ -431,7 +432,7 @@ def initialize_birds(N, L, v0, theta_start, eta, method):
         raise ValueError(f"Unknown initialisation method: {method}. Choose from 'random', 'uniform', 'v-flock'.")
 
 
-def initialize_obstacles(L, num_obstacles, nrows, ncols, shape, Rx, Ry, x_spacing, y_spacing, offset, beta):
+def initialize_obstacles(L, num_obstacles, nrows, ncols, shape, Rx, Ry, x_spacing, y_spacing, offset, beta, n):
     '''
     Master function to initialise obstacles and get lists of their x, y points
     '''
@@ -445,13 +446,13 @@ def initialize_obstacles(L, num_obstacles, nrows, ncols, shape, Rx, Ry, x_spacin
         
         # Make obstacles depending on specified shape
         if shape == "rectangular":
-            x_obs, y_obs = make_rectangular_obstacle(x_centres[i], y_centres[i], num_obstacles, L1=100, L2=5)
+            x_obs, y_obs = make_rectangular_obstacle(x_centres[i], y_centres[i], n, L1=100, L2=5)
 
         elif shape == "circular":
-            x_obs, y_obs = make_circular_obstacle(x_centres[i], y_centres[i], num_obstacles, R=50)
+            x_obs, y_obs = make_circular_obstacle(x_centres[i], y_centres[i], n, R=50)
 
         elif shape == "elliptical":
-            x_obs, y_obs = make_elliptical_obstacle(x_centres[i], y_centres[i], num_obstacles, Rx, Ry)
+            x_obs, y_obs = make_elliptical_obstacle(x_centres[i], y_centres[i], n, Rx, Ry)
 
         else:
             raise ValueError(f"Unknown initialisation shape: {shape}. Choose from 'rectangular', 'circular', 'elliptical'.")
@@ -462,6 +463,8 @@ def initialize_obstacles(L, num_obstacles, nrows, ncols, shape, Rx, Ry, x_spacin
     # Concatenate lists for analysis
     x_obstacle = np.concatenate(x_obstacle_list)
     y_obstacle = np.concatenate(y_obstacle_list)
+    
+    print(x_obs, y_obs)
     
     return x_obstacle_list, y_obstacle_list, x_obstacle, y_obstacle
 
