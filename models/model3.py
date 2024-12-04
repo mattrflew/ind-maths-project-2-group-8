@@ -586,4 +586,4 @@ def run_model3(params, plot = False):
         offset_values.append(calculate_path_offset(x, y, params.goal_x, params.goal_y))
         clustering_coefficients.append(get_clustering_coefficient(vx, vy, params.v0, vx_wind, vy_wind, params.N))
         
-        return dispersion_values, offset_values, clustering_coefficients
+    return dispersion_values, offset_values, clustering_coefficients
