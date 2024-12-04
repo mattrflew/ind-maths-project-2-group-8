@@ -175,8 +175,8 @@ def initialize_birds_triangle(N, L, v0, theta_start, eta):
         x_row_start = x_row_0 - half_base
         
         for i in range(birds_in_row):
-            x.append(x_row_start + (i * min_distance))
-            y.append(y_pos)
+            x.append([x_row_start + (i * min_distance)])
+            y.append([y_pos])
         
         # update total birds and row counters
         total_birds += birds_in_row
