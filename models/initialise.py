@@ -13,7 +13,7 @@ For the initialisation of birds we define:
 
 1) initialize_birds_random() - 
 2) initialize_birds_square() - 
-3) initialize_birds_triangle -
+3) initialize_birds_triangle() -
 
 For the initialision of objects we define:
 
@@ -400,7 +400,6 @@ def wind_combined(x, y, t, A_x, A_y, k, f):
     vy_wind = vy_spatial + vy_dynamic
     
     return vx_wind, vy_wind
-
 
 
 # =============================================================================
