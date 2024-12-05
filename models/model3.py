@@ -649,7 +649,7 @@ def run_model3(params, plot = False):
     )
 
     # Fetch the initial birds in the environment
-    x, y, vx, vy, theta = initialize_birds(
+    x, y, vx, vy, _, r_effective  = initialize_birds(
         N = params.N, 
         L = params.L, 
         v0 = params.v0, 
