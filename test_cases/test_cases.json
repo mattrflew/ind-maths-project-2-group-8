@@ -40,9 +40,9 @@
         "nrows": 3,
         "ncols": 10,
         "x_spacing": 400,
-        "y_spacing": 700,
-        "offset": 350.0,
-        "beta": 0.5235987755982988
+        "y_spacing": 1000,
+        "offset": 0,
+        "beta": 0
     },
     "test_004": {
         "num_obstacles": 30,
@@ -50,7 +50,7 @@
         "ncols": 10,
         "x_spacing": 400,
         "y_spacing": 1000,
-        "offset": 0,
+        "offset": 500.0,
         "beta": 0
     },
     "test_005": {
@@ -59,26 +59,26 @@
         "ncols": 10,
         "x_spacing": 400,
         "y_spacing": 1000,
-        "offset": 500.0,
-        "beta": 0
+        "offset": 0,
+        "beta": 0.5235987755982988
     },
     "test_006": {
         "num_obstacles": 30,
         "nrows": 3,
         "ncols": 10,
-        "x_spacing": 400,
-        "y_spacing": 1000,
+        "x_spacing": 600,
+        "y_spacing": 700,
         "offset": 0,
-        "beta": 0.5235987755982988
+        "beta": 0
     },
     "test_007": {
         "num_obstacles": 30,
         "nrows": 3,
         "ncols": 10,
-        "x_spacing": 400,
-        "y_spacing": 1000,
-        "offset": 500.0,
-        "beta": 0.5235987755982988
+        "x_spacing": 600,
+        "y_spacing": 700,
+        "offset": 350.0,
+        "beta": 0
     },
     "test_008": {
         "num_obstacles": 30,
@@ -87,15 +87,15 @@
         "x_spacing": 600,
         "y_spacing": 700,
         "offset": 0,
-        "beta": 0
+        "beta": 0.5235987755982988
     },
     "test_009": {
         "num_obstacles": 30,
         "nrows": 3,
         "ncols": 10,
         "x_spacing": 600,
-        "y_spacing": 700,
-        "offset": 350.0,
+        "y_spacing": 1000,
+        "offset": 0,
         "beta": 0
     },
     "test_010": {
@@ -103,62 +103,62 @@
         "nrows": 3,
         "ncols": 10,
         "x_spacing": 600,
-        "y_spacing": 700,
-        "offset": 0,
-        "beta": 0.5235987755982988
+        "y_spacing": 1000,
+        "offset": 500.0,
+        "beta": 0
     },
     "test_011": {
         "num_obstacles": 30,
         "nrows": 3,
         "ncols": 10,
         "x_spacing": 600,
-        "y_spacing": 700,
-        "offset": 350.0,
+        "y_spacing": 1000,
+        "offset": 0,
         "beta": 0.5235987755982988
     },
     "test_012": {
-        "num_obstacles": 30,
-        "nrows": 3,
-        "ncols": 10,
-        "x_spacing": 600,
-        "y_spacing": 1000,
-        "offset": 0,
-        "beta": 0
-    },
-    "test_013": {
-        "num_obstacles": 30,
-        "nrows": 3,
-        "ncols": 10,
-        "x_spacing": 600,
-        "y_spacing": 1000,
-        "offset": 500.0,
-        "beta": 0
-    },
-    "test_014": {
-        "num_obstacles": 30,
-        "nrows": 3,
-        "ncols": 10,
-        "x_spacing": 600,
-        "y_spacing": 1000,
-        "offset": 0,
-        "beta": 0.5235987755982988
-    },
-    "test_015": {
-        "num_obstacles": 30,
-        "nrows": 3,
-        "ncols": 10,
-        "x_spacing": 600,
-        "y_spacing": 1000,
-        "offset": 500.0,
-        "beta": 0.5235987755982988
-    },
-    "test_016": {
         "num_obstacles": 50,
         "nrows": 5,
         "ncols": 10,
         "x_spacing": 400,
         "y_spacing": 700,
         "offset": 0,
+        "beta": 0
+    },
+    "test_013": {
+        "num_obstacles": 50,
+        "nrows": 5,
+        "ncols": 10,
+        "x_spacing": 400,
+        "y_spacing": 700,
+        "offset": 350.0,
+        "beta": 0
+    },
+    "test_014": {
+        "num_obstacles": 50,
+        "nrows": 5,
+        "ncols": 10,
+        "x_spacing": 400,
+        "y_spacing": 700,
+        "offset": 0,
+        "beta": 0.5235987755982988
+    },
+    "test_015": {
+        "num_obstacles": 50,
+        "nrows": 5,
+        "ncols": 10,
+        "x_spacing": 400,
+        "y_spacing": 1000,
+        "offset": 0,
+        "beta": 0
+    },
+    "test_016": {
+        "num_obstacles": 50,
+        "nrows": 5,
+        "ncols": 10,
+        "x_spacing": 400,
+        "y_spacing": 1000,
+        "offset": 500.0,
         "beta": 0
     },
     "test_017": {
@@ -166,134 +166,62 @@
         "nrows": 5,
         "ncols": 10,
         "x_spacing": 400,
-        "y_spacing": 700,
-        "offset": 350.0,
-        "beta": 0
+        "y_spacing": 1000,
+        "offset": 0,
+        "beta": 0.5235987755982988
     },
     "test_018": {
         "num_obstacles": 50,
         "nrows": 5,
         "ncols": 10,
-        "x_spacing": 400,
+        "x_spacing": 600,
         "y_spacing": 700,
         "offset": 0,
-        "beta": 0.5235987755982988
+        "beta": 0
     },
     "test_019": {
         "num_obstacles": 50,
         "nrows": 5,
         "ncols": 10,
-        "x_spacing": 400,
+        "x_spacing": 600,
         "y_spacing": 700,
         "offset": 350.0,
-        "beta": 0.5235987755982988
+        "beta": 0
     },
     "test_020": {
         "num_obstacles": 50,
         "nrows": 5,
         "ncols": 10,
-        "x_spacing": 400,
-        "y_spacing": 1000,
+        "x_spacing": 600,
+        "y_spacing": 700,
         "offset": 0,
-        "beta": 0
+        "beta": 0.5235987755982988
     },
     "test_021": {
         "num_obstacles": 50,
         "nrows": 5,
         "ncols": 10,
-        "x_spacing": 400,
+        "x_spacing": 600,
         "y_spacing": 1000,
-        "offset": 500.0,
+        "offset": 0,
         "beta": 0
     },
     "test_022": {
         "num_obstacles": 50,
         "nrows": 5,
         "ncols": 10,
-        "x_spacing": 400,
+        "x_spacing": 600,
         "y_spacing": 1000,
-        "offset": 0,
-        "beta": 0.5235987755982988
+        "offset": 500.0,
+        "beta": 0
     },
     "test_023": {
         "num_obstacles": 50,
         "nrows": 5,
         "ncols": 10,
-        "x_spacing": 400,
-        "y_spacing": 1000,
-        "offset": 500.0,
-        "beta": 0.5235987755982988
-    },
-    "test_024": {
-        "num_obstacles": 50,
-        "nrows": 5,
-        "ncols": 10,
-        "x_spacing": 600,
-        "y_spacing": 700,
-        "offset": 0,
-        "beta": 0
-    },
-    "test_025": {
-        "num_obstacles": 50,
-        "nrows": 5,
-        "ncols": 10,
-        "x_spacing": 600,
-        "y_spacing": 700,
-        "offset": 350.0,
-        "beta": 0
-    },
-    "test_026": {
-        "num_obstacles": 50,
-        "nrows": 5,
-        "ncols": 10,
-        "x_spacing": 600,
-        "y_spacing": 700,
-        "offset": 0,
-        "beta": 0.5235987755982988
-    },
-    "test_027": {
-        "num_obstacles": 50,
-        "nrows": 5,
-        "ncols": 10,
-        "x_spacing": 600,
-        "y_spacing": 700,
-        "offset": 350.0,
-        "beta": 0.5235987755982988
-    },
-    "test_028": {
-        "num_obstacles": 50,
-        "nrows": 5,
-        "ncols": 10,
         "x_spacing": 600,
         "y_spacing": 1000,
         "offset": 0,
-        "beta": 0
-    },
-    "test_029": {
-        "num_obstacles": 50,
-        "nrows": 5,
-        "ncols": 10,
-        "x_spacing": 600,
-        "y_spacing": 1000,
-        "offset": 500.0,
-        "beta": 0
-    },
-    "test_030": {
-        "num_obstacles": 50,
-        "nrows": 5,
-        "ncols": 10,
-        "x_spacing": 600,
-        "y_spacing": 1000,
-        "offset": 0,
-        "beta": 0.5235987755982988
-    },
-    "test_031": {
-        "num_obstacles": 50,
-        "nrows": 5,
-        "ncols": 10,
-        "x_spacing": 600,
-        "y_spacing": 1000,
-        "offset": 500.0,
         "beta": 0.5235987755982988
     }
 }
