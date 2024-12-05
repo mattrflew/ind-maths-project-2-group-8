@@ -55,8 +55,8 @@ class params_default:
         self.R_bird = 30              # Interaction radius (bird-bird)
         self.Rsq = self.R_bird**2     # Square of the interaction radius
         self.N = 300                  # number of birds
-        self.fov_angle = np.pi        # Field of View of birds
-        self.R_min = 2                # a minimum distance they would like to maintain, r.
+        self.fov_angle = 3*np.pi/2        # Field of View of birds
+        self.R_min = 5                # a minimum distance they would like to maintain, r.
 
         self.R_obs = 300              # Viewing radius (bird - obstacles)
         self.R_obs_min = 300          # Minimum radius (bird - obstacles)
