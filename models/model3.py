@@ -166,7 +166,7 @@ def get_obstacles_within_radius(bird_loc, x_obstacle_list, y_obstacle_list, R_ob
     # Return indices of objects within the birds radius
     return obstacles_within_radius
 
-def obstacle_vel(i, x, y, vx, vy, bird_vmax, R_min, R_obs, x_obstacle_list, y_obstacle_list, vx_wind, vy_wind):
+def obstacle_vel(i, x, y, vx, vy, bird_vmax, R_obs_min, R_obs, x_obstacle_list, y_obstacle_list, vx_wind, vy_wind):
     
     # Initialize obstacle velocity
     obstacle_vx, obstacle_vy = 0, 0
@@ -208,7 +208,7 @@ def obstacle_vel(i, x, y, vx, vy, bird_vmax, R_min, R_obs, x_obstacle_list, y_ob
             perp_distance = np.linalg.norm(perpendicular_vec)
 
             # Check distance and projection bounds
-            if perp_distance <= R_min and 0 <= projection_length <= np.linalg.norm(lot_vec):
+            if perp_distance <= R_obs_min and 0 <= projection_length <= np.linalg.norm(lot_vec):
                 if perp_distance < min_distance:
                     min_distance = perp_distance
                     closest_obstacle_idx = obs_idx
@@ -240,7 +240,7 @@ def obstacle_vel(i, x, y, vx, vy, bird_vmax, R_min, R_obs, x_obstacle_list, y_ob
     adjusted_outward_vec = normalise(outward_vec + np.array([vx_wind, vy_wind]))
 
     # Calculate a safe point
-    safe_point = closest_edge + 1.5 * R_min * adjusted_outward_vec
+    safe_point = closest_edge + 2 * R_obs_min * adjusted_outward_vec
 
     # Compute steering velocity
     steer_vec = normalise(safe_point - bird_loc)
@@ -305,6 +305,7 @@ def step(
     R_bird,
     R_min,
     R_obs,
+    R_obs_min,
     N,
     dt,
     bird_speed_max,
@@ -368,7 +369,7 @@ def step(
         neighbours, too_close = proximity_lists(i, x, y, R_bird, R_min)
         
         # Obstacle avoidance component
-        obstacle_vx, obstacle_vy = obstacle_vel(i, x, y, vx, vy, bird_vmax, R_min, R_obs, x_obstacle_list, y_obstacle_list, vx_wind, vy_wind)
+        obstacle_vx, obstacle_vy = obstacle_vel(i, x, y, vx, vy, bird_speed_max, R_obs_min, R_obs, x_obstacle_list, y_obstacle_list, vx_wind, vy_wind)
         
         # Center of mass component
         centre_vx, centre_vy = centre_vel(i, x, y, neighbours)
@@ -399,6 +400,7 @@ def step(
     
     return x, y, vx, vy, vx_wind, vy_wind
 
+
 def step(
     x,
     y,
@@ -408,6 +410,7 @@ def step(
     R_bird,
     R_min,
     R_obs,
+    R_obs_min,
     N,
     dt,
     bird_speed_max,
@@ -467,7 +470,7 @@ def step(
             wind_vy = vy_wind[i]
 
         obstacle_vx, obstacle_vy = obstacle_vel(
-            i, x, y, vx, vy, bird_speed_max, R_min, R_obs, x_obstacle_list, y_obstacle_list, vx_wind, vy_wind
+            i, x, y, vx, vy, bird_speed_max, R_obs_min, R_obs, x_obstacle_list, y_obstacle_list, vx_wind, vy_wind
         )
 
         # If obstacle avoidance is active then find velocity needed to avoid obstacle
@@ -548,6 +551,7 @@ def step(
     
     return x, y, vx, vy, vx_wind, vy_wind
 
+
 # -----------------------------------------------------------------------------
 # Run Model 3
 # -----------------------------------------------------------------------------
@@ -623,6 +627,7 @@ def run_model3(params, plot = False):
             R_bird=params.R_bird,
             R_min=params.r_min,
             R_obs = params.R_obs,
+            R_obs_min = params.R_obs_min,
             N=params.N,
             dt=params.dt,
             bird_speed_max=params.vmax,
@@ -661,5 +666,3 @@ def run_model3(params, plot = False):
         clustering_coefficients.append(get_clustering_coefficient(vx, vy, params.v0, vx_wind, vy_wind, params.N))
         
     return dispersion_values, offset_values, clustering_coefficients
-
-
