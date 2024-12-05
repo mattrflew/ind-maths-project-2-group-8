@@ -59,7 +59,7 @@ class params_default:
         self.R_min = 2                # a minimum distance they would like to maintain, r.
 
         self.R_obs = 300              # Viewing radius (bird - obstacles)
-        self.R_obs_min = 200          # Minimum radius (bird - obstacles)
+        self.R_obs_min = 300          # Minimum radius (bird - obstacles)
         
         # Migratory goal vector
         self.goal_x = 0               # X-component of common goal direction vector
