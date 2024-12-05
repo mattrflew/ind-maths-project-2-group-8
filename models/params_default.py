@@ -63,6 +63,10 @@ class params_default:
         self.goal_x = 0               # X-component of common goal direction vector
         self.goal_y = 1               # Y-component of common goal direction vector
 
+        # Migratory goal position
+        self.goal_x_loc = self.L/2             # X-component of common goal position
+        self.goal_y_loc = self.L               # Y-component of common goal position
+        
         # Flock shape
         self.theta_start = np.pi / 2  # Starting bird direction
         self.bird_method = "v-flock"  # The method of bird initialisation

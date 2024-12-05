@@ -191,8 +191,8 @@ def initialize_birds_triangle(N, L, v0, theta_start, eta):
     y = np.array(y, dtype=float)
     
     # shift all y_pos up so birds start within the domain
-    y = y + (row-1)*min_distance + L/6
-
+    # y = y + (row-1)*min_distance + L/6
+    y = y + (row-1)*min_distance
     # Bird Angle
     # Make all birds the same starting angle
     theta = np.ones((len(x), 1)) * theta_start

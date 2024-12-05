@@ -129,7 +129,6 @@ def number_nearest_neightbours(x, y, Rsq, N):
 
 
 def number_of_flocks(x, y, r_effective):
-
     positions = np.column_stack((x,y))
 
     # Apply DBSCAN
@@ -140,18 +139,22 @@ def number_of_flocks(x, y, r_effective):
 
     return num_flocks
 
+def calculate_distance_to_goal(x, y, goal_x_loc, goal_y_loc):
+    # Calculate the distance away from the goal end location
+    
+    distances_to_goal = np.sqrt((x - goal_x_loc)**2 + (y - goal_y_loc)**2)
+    return distances_to_goal
 
-
-def return_metric_statistics(dispersion_values, offset_values, clustering_coefficients):
+def return_metric_statistics(dispersion_values, distances_to_goal, clustering_coefficients):
     '''
     Returns the averaged metrics (i.e. results of the simulation)
     '''
     avg_dispersion = np.mean(dispersion_values)
-    avg_offset = np.mean(offset_values)
+    avg_distance_to_goal = np.mean(distances_to_goal)
     avg_clustering_coefficient = np.mean(clustering_coefficients)
 
     
-    return avg_dispersion, avg_offset, avg_clustering_coefficient
+    return avg_dispersion, avg_distance_to_goal, avg_clustering_coefficient
 
 
 # -----------------------------------------------------------------------------
