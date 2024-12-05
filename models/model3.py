@@ -144,7 +144,29 @@ def migratory_vel(goal_x, goal_y):
 # Obstacle Velocity - velocity to steer away from incoming obstacles
 # -----------------------------------------------------------------------------
 
-def obstacle_vel(i, x, y, vx, vy, R_min, R_obs, x_obstacle_list, y_obstacle_list, vx_wind, vy_wind, num_samples = 10):
+# Similar function as model 1 but uses just radius and position rather than angles
+
+def get_obstacles_within_radius(bird_loc, x_obstacle_list, y_obstacle_list, R_obs):
+    
+    # Initialise obstacle index list
+    obstacles_within_radius = []
+
+    # Decompose the position vector
+    x_bird, y_bird = bird_loc  
+
+    for idx, (x_points, y_points) in enumerate(zip(x_obstacle_list, y_obstacle_list)):
+        
+        # Calculate distances from bird to all points of the current obstacle
+        distances = np.sqrt((x_points - x_bird) ** 2 + (y_points - y_bird) ** 2)
+        
+        # Check if any point of the obstacle is within the radius
+        if np.any(distances <= R_obs):
+            obstacles_within_radius.append(idx)
+
+    # Return indices of objects within the birds radius
+    return obstacles_within_radius
+
+def obstacle_vel(i, x, y, vx, vy, bird_vmax, R_min, R_obs, x_obstacle_list, y_obstacle_list, vx_wind, vy_wind, num_samples = 3):
     
     # -------------------------------------------------------------------------
     # Find obstacles which could result in a collision with bird's current traj
@@ -159,68 +181,80 @@ def obstacle_vel(i, x, y, vx, vy, R_min, R_obs, x_obstacle_list, y_obstacle_list
     
     # Get current travelling vector of bird and normalise
     travel_vec = normalise(np.array([vx[i][0], vy[i][0]]))
-    
-    # Create uniformly spaced points along the bird's "line of travel"
-    # This is maxed at the bird obstacle viewing radius
-    lot_values = np.linspace(0, R_obs, num_samples).reshape(-1, 1) 
-    lot_points = bird_loc + lot_values * travel_vec
-    
-    # Initialise a list to store the obstacle points that are too close to bird
-    too_close_points = []
-    lot_points_x = lot_points[:,0]
-    lot_points_y = lot_points[:,1]
-    
-    # Loop over spaced points on the bird's line of travel
-    for lot_x, lot_y in zip(lot_points_x, lot_points_y):
-        
-        # Iterate over each obstacle in the obstacle list
-        for obstacle_idx, (x_obs, y_obs) in enumerate(zip(x_obstacle_list, y_obstacle_list)):
-            
-            # Calculate distance from line of travel point to the current obstacle's points
-            distances = np.sqrt((np.array(x_obs) - lot_x)**2 + (np.array(y_obs) - lot_y)**2)
-            
-            # Find the obstacle(s) which is too close
-            close_indices = np.where(distances <= R_min)[0]  
-    
-            # Store the specific point(s) on the obstacle which the bird could hit
-            if len(close_indices) > 0:
-                
-                # Append the obstacle(s) index and point(s) index
-                too_close_points.extend([(obstacle_idx, idx) for idx in close_indices])
-    
-    # Remove duplicates if necessary
-    too_close_points = list(set(too_close_points))
 
-    # If no obstacle points are too close then
-    if not too_close_points:
-        
-        # The bird doesn't need a obstacle velocity component, return 0 
+    # Get indices of obstacles within radius of obstacle viewing distance of bird
+    obstacles_within_radius = get_obstacles_within_radius(bird_loc, 
+                                                          x_obstacle_list, y_obstacle_list, 
+                                                          R_obs)
+    
+    # If none, bird doesn't need a obstacle velocity component, return 0 
+    if len(obstacles_within_radius) == 0:
         return obstacle_vx, obstacle_vy
     
-    # -------------------------------------------------------------------------
-    # If possible collision detected, find what object this is for
-    # -------------------------------------------------------------------------
-    
-    # Start with a large value
-    min_distance = np.inf  
+    # Create a "line of sight" vector for the bird 
+    # This is the normalised travel vector multiplied by magnitude of obstacle viewing radius
+    # los_vec = travel_vec * R_obs
 
-    for obstacle_idx, point_idx in too_close_points:
-        
-        # Get the coordinates of the point
-        point_x = x_obstacle_list[obstacle_idx][point_idx]
-        point_y = y_obstacle_list[obstacle_idx][point_idx]
-        
-        # Calculate distance from bird's current position to the point
-        distance_to_bird = np.sqrt((point_x - x[i][0])**2 + (point_y - y[i][0])**2)
-        
-        # Check if this point is closer than the current closest
-        if distance_to_bird < min_distance:
-            min_distance = distance_to_bird
-            most_threatening_point = (obstacle_idx, point_idx)
-            
-    
-    # Now "most_threatening_point" contains the obstacle index and point index
-    obstacle_idx, point_idx = most_threatening_point
+    # Create a "line of travel" vector for the bird 
+    # This is the normalised travel vector multiplied by max travel speed of the bird
+    # This gives the furthest away position the bird could be at in the next time step
+    lot_vec = travel_vec * bird_vmax
+    lot_vec_half = 0.5 * lot_vec
+
+    # -------------------------------------------------------------------------
+    # If objects within radius detected, find most threatening object
+    # -------------------------------------------------------------------------
+
+    # Initialize variables to track the closest obstacle
+    min_distance = float('inf')  # Start with a very large value
+    closest_obstacle_idx = None
+    closest_point = None
+
+    # Loop over obstacles within the radius
+    for obs_idx in obstacles_within_radius:
+
+        # Get the x and y points of the current obstacle
+        x_obs_points = x_obstacle_list[obs_idx]
+        y_obs_points = y_obstacle_list[obs_idx]
+
+        # Stack the obstacle points for easier distance computation
+        obstacle_points = np.column_stack((x_obs_points, y_obs_points))
+
+        # Loop over each point of the current obstacle
+        for point in obstacle_points:
+
+            # Vector from bird's current position to the obstacle point
+            rel_vec = point - bird_loc
+
+            # Check if the point is in front of the bird
+            dot_product = np.dot(rel_vec, travel_vec)
+
+            # Ignore obstacles behind the bird
+            if dot_product <= 0:
+                continue  
+
+            # Project the relative vector onto the line of travel
+            projection_length = np.dot(rel_vec, travel_vec)
+            projection_vec = projection_length * travel_vec
+
+            # Calculate the perpendicular vector
+            perpendicular_vec = rel_vec - projection_vec
+
+            # Compute the perpendicular distance
+            perp_distance = np.linalg.norm(perpendicular_vec)
+
+            # Check if the point is within R_min and in the travel vector range
+            if perp_distance <= R_min and 0 <= projection_length <= np.linalg.norm(lot_vec):
+
+                # Update if this is the closest point so far
+                if perp_distance < min_distance:
+                    min_distance = perp_distance
+                    closest_obstacle_idx = obs_idx
+                    closest_point = point
+
+    # If none, bird doesn't need a obstacle velocity component, return 0  
+    if closest_obstacle_idx == None:
+        return obstacle_vx, obstacle_vy
 
     # -------------------------------------------------------------------------
     # If possible collision detected, find nearest silhouette edge of object
@@ -231,8 +265,9 @@ def obstacle_vel(i, x, y, vx, vy, R_min, R_obs, x_obstacle_list, y_obstacle_list
 
     # Project each point of collision obstacle on to this perp line
     # Find points of object that can result in collision
-    coll_obstacle_x = x_obstacle_list[obstacle_idx]
-    coll_obstacle_y = y_obstacle_list[obstacle_idx]
+    coll_obstacle_x = x_obstacle_list[closest_obstacle_idx]
+    coll_obstacle_y = y_obstacle_list[closest_obstacle_idx]
+
     coll_obstacle_points = np.column_stack((coll_obstacle_x, coll_obstacle_y))
     
     # Initialize a list to store projections and corresponding points
@@ -317,6 +352,87 @@ def obstacle_vel(i, x, y, vx, vy, R_min, R_obs, x_obstacle_list, y_obstacle_list
          
     return obstacle_vx, obstacle_vy
 
+def obstacle_vel(i, x, y, vx, vy, bird_vmax, R_min, R_obs, x_obstacle_list, y_obstacle_list, vx_wind, vy_wind):
+    
+    # Initialize obstacle velocity
+    obstacle_vx, obstacle_vy = 0, 0
+
+    # Bird's position and normalized travel vector
+    bird_loc = np.array([x[i][0], y[i][0]])
+    travel_vec = normalise(np.array([vx[i][0], vy[i][0]]))
+
+    # Find obstacles within the viewing radius
+    obstacles_within_radius = get_obstacles_within_radius(bird_loc, x_obstacle_list, y_obstacle_list, R_obs)
+    
+    # If no obstacles to avoid, then exit and return no contribution
+    if not obstacles_within_radius:
+        return obstacle_vx, obstacle_vy  
+
+    # Line of travel vector scaled by bird's max speed
+    lot_vec = travel_vec * bird_vmax
+
+    # Variables to track the most threatening obstacle
+    min_distance = float('inf')
+    closest_obstacle_idx = None
+    closest_point = None
+
+    # Check points of each obstacle within the radius
+    for obs_idx in obstacles_within_radius:
+
+        obstacle_points = np.column_stack((x_obstacle_list[obs_idx], y_obstacle_list[obs_idx]))
+
+        for point in obstacle_points:
+
+            rel_vec = point - bird_loc  # Vector to obstacle point
+            dot_product = np.dot(rel_vec, travel_vec)
+
+            if dot_product <= 0:
+                continue  # Skip points behind the bird
+
+            projection_length = np.dot(rel_vec, travel_vec)
+            perpendicular_vec = rel_vec - projection_length * travel_vec
+            perp_distance = np.linalg.norm(perpendicular_vec)
+
+            # Check distance and projection bounds
+            if perp_distance <= R_min and 0 <= projection_length <= np.linalg.norm(lot_vec):
+                if perp_distance < min_distance:
+                    min_distance = perp_distance
+                    closest_obstacle_idx = obs_idx
+                    closest_point = point
+
+    if closest_obstacle_idx is None:
+        return obstacle_vx, obstacle_vy  # No threat detected
+
+    # Get the points of the closest obstacle
+    coll_obstacle_x = x_obstacle_list[closest_obstacle_idx]
+    coll_obstacle_y = y_obstacle_list[closest_obstacle_idx]
+    coll_obstacle_points = np.column_stack((coll_obstacle_x, coll_obstacle_y))
+
+    # Compute perpendicular vector from travel vector
+    perp_vec = np.array([-travel_vec[1], travel_vec[0]])
+    projections = [np.dot(obs - bird_loc, perp_vec) for obs in coll_obstacle_points]
+
+    # Selects the two points on obstacle's silhouette that give the biggest
+    # projections along a perpendicular vector to the bird's travel vector. 
+    silhouette_edges = coll_obstacle_points[np.argsort(projections)[:2]]
+
+    # Select the edge closest to the bird
+    closest_edge = min(silhouette_edges, key=lambda edge: np.linalg.norm(edge - bird_loc))
+
+    # Compute an directional vector from the object centre to most threatening point
+    outward_vec = normalise(closest_edge - np.mean(coll_obstacle_points, axis=0))
+
+    # Make sure to account for wind
+    adjusted_outward_vec = normalise(outward_vec + np.array([vx_wind, vy_wind]))
+
+    # Calculate a safe point
+    safe_point = closest_edge + 1.5 * R_min * adjusted_outward_vec
+
+    # Compute steering velocity
+    steer_vec = normalise(safe_point - bird_loc)
+    obstacle_vx, obstacle_vy = steer_vec
+
+    return obstacle_vx, obstacle_vy
 
 # -----------------------------------------------------------------------------
 # Update velocities
@@ -365,7 +481,6 @@ def update_velocity(i, vx, vy,
 # -----------------------------------------------------------------------------
 # Update steps
 # -----------------------------------------------------------------------------
-
 
 def step(
     x,
@@ -439,7 +554,7 @@ def step(
         neighbours, too_close = proximity_lists(i, x, y, R_bird, R_min)
         
         # Obstacle avoidance component
-        obstacle_vx, obstacle_vy = obstacle_vel(i, x, y, vx, vy, R_min, R_obs, x_obstacle_list, y_obstacle_list, wind_vx, wind_vy, num_samples = 10)
+        obstacle_vx, obstacle_vy = obstacle_vel(i, x, y, vx, vy, bird_vmax, R_min, R_obs, x_obstacle_list, y_obstacle_list, vx_wind, vy_wind)
         
         # Center of mass component
         centre_vx, centre_vy = centre_vel(i, x, y, neighbours)
@@ -538,7 +653,7 @@ def step(
             wind_vy = vy_wind[i]
 
         obstacle_vx, obstacle_vy = obstacle_vel(
-            i, x, y, vx, vy, R_min,  R_obs, x_obstacle_list, y_obstacle_list, wind_vx, wind_vy, num_samples=10
+            i, x, y, vx, vy, bird_vmax, R_min, R_obs, x_obstacle_list, y_obstacle_list, vx_wind, vy_wind
         )
 
         # If obstacle avoidance is active then find velocity needed to avoid obstacle
@@ -618,7 +733,6 @@ def step(
     vy = vy_new.reshape(-1, 1)
     
     return x, y, vx, vy, vx_wind, vy_wind
-
 
 # -----------------------------------------------------------------------------
 # Run Model 3
@@ -733,3 +847,4 @@ def run_model3(params, plot = False):
         clustering_coefficients.append(get_clustering_coefficient(vx, vy, params.v0, vx_wind, vy_wind, params.N))
         
     return dispersion_values, offset_values, clustering_coefficients
+
