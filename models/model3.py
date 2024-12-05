@@ -35,11 +35,11 @@ from matplotlib.animation import FuncAnimation
 
 def proximity_lists(i, x, y, R_bird, R_min):
     """
-    The function finds the neighbouring and too close birds for a specific bird
+    The function finds the neighbouring and "too close" birds for a specific bird
     """
 
     # Compute distances from bird "i" to all other birds
-    distances = np.sqrt((x - x[i])**2 + (y - y[i])**2)
+    distances = np.sqrt((x[:,0] - x[i][0])**2 + (y[:,0] - y[i][0])**2)
     
     # Define the set of neighbours that the bird can see
     neighbours = np.where(distances <= R_bird)[0]
@@ -51,7 +51,7 @@ def proximity_lists(i, x, y, R_bird, R_min):
     neighbours = neighbours[neighbours != i]
     too_close = too_close[too_close != i]   
     
-    return neighbours, too_close    
+    return neighbours, too_close      
 
 # -----------------------------------------------------------------------------
 # Centre Velocity - Move towards the centre of the flock
@@ -93,8 +93,8 @@ def avoid_vel(i, x, y, too_close):
     avoid_vy = 0
 
     # Compute avoidance velocity contributions
-    avoid_vx = (x[i][0] - x[too_close][0])
-    avoid_vy = (y[i][0] - y[too_close][0])
+    avoid_vx = np.sum(x[i, 0] - x[too_close, 0])
+    avoid_vy = np.sum(y[i, 0] - y[too_close, 0])
     
     # Normalize the avoidance vector to ensure a unit direction
     normalised_avoidance = normalise(np.array([avoid_vx, avoid_vy]))
@@ -666,7 +666,7 @@ def run_model3(params, plot = False):
         ax.plot(xx, yy, 'r-')
 
     # Plot initial quivers
-    q = plt.quiver(x,y,vx,vy)
+    q = plt.quiver(x, y, vx, vy, scale=4, angles='xy', scale_units='xy', color='b', width=0.005)
 
     # Wind visualization
     vx_wind, vy_wind = wind(x, y, 0, params.v0_wind, params.v_wind_noise, params.wind_theta, params.wind_theta_noise, params.A_x, params.A_y, params.k, params.f, params.wind_method)
