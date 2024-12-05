@@ -137,7 +137,7 @@ def initialize_birds_square(N, L, v0, theta_start, eta):
     return x, y, vx, vy, theta
 
 
-def initialize_birds_triangle(N, L, v0, theta_start, eta):
+def initialize_birds_triangle(N, L, v0, theta_start, eta, min_distance):
     '''
     Set initial positions as a triangle starting at the bottome edge of the simulation box.
     Set direction and velocity to be uniform with a small amount of noise 
@@ -145,7 +145,6 @@ def initialize_birds_triangle(N, L, v0, theta_start, eta):
     Triangle is shaped based on an angle (be an obstuse angle). Make it an obtuse isoceles triangle
     Birds should spaced by 2 m in both the x and y directions
     '''
-    min_distance = 2
     top_angle = np.radians(150)
 
     # Properties of obtuse isoceles triangle
@@ -415,7 +414,7 @@ def wind_combined(x, y, t, A_x, A_y, k, f):
 # Master Functions
 # =============================================================================
 
-def initialize_birds(N, L, v0, theta_start, eta, method):
+def initialize_birds(N, L, v0, theta_start, eta, method, min_distance):
     """
     Master function to initialise birds based on the specified method
 
@@ -429,7 +428,7 @@ def initialize_birds(N, L, v0, theta_start, eta, method):
         return initialize_birds_square(N, L, v0, theta_start, eta)
 
     elif method == "v-flock":
-        return initialize_birds_triangle(N, L, v0, theta_start, eta)
+        return initialize_birds_triangle(N, L, v0, theta_start, eta, min_distance)
 
     else:
         raise ValueError(f"Unknown initialisation method: {method}. Choose from 'random', 'uniform', 'v-flock'.")
