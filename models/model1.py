@@ -252,7 +252,8 @@ def run_model1(params, plot = False):
         v0 = params.v0, 
         theta_start = params.theta_start, 
         eta = params.eta,
-        method = params.bird_method
+        method = params.bird_method,
+        min_distance = params.R_min
     )
 
     # Set up a figure
