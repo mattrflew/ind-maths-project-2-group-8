@@ -84,6 +84,7 @@ def get_obstacles_within_radius(x_bird, y_bird, theta_bird, x_obstacle, y_obstac
     
     # Difference between obstacle and current direction of bird
     angle_diff = np.abs(angles_to_obstacles - theta_bird)
+    # angle_diff = (angles_to_obstacles - theta_bird + np.pi/2) % (2*np.pi) - np.pi
     
     # Filter by field of view
     is_in_fov = angle_diff <= fov_angle
@@ -115,6 +116,9 @@ def update_theta(x, y, theta, Rsq, x_obstacle, y_obstacle, R_obs, eta, N, fov_an
         # Determine if obstacles in radius
         x_obs_in_radius, y_obs_in_radius, distances = get_obstacles_within_radius(x[i], y[i], theta_new[i], x_obstacle, y_obstacle, R_obs, fov_angle)
 
+        # avoid division by zero
+        distances[distances == 0] = np.finfo(float).eps
+        
         # Only continue if there are obstacles in radius
         if np.any(distances):
             
@@ -122,11 +126,15 @@ def update_theta(x, y, theta, Rsq, x_obstacle, y_obstacle, R_obs, eta, N, fov_an
             avoidance_vectors = np.array([x[i] - x_obs_in_radius, y[i] - y_obs_in_radius])
 
             # # Normalise by distance (this should(?) make closer distances more important)
-            avoidance_vectors = avoidance_vectors/distances
+            # avoidance_vectors = avoidance_vectors/distances
+            # weights = 1/ (distances + 1e-5)
 
+            # weighted_avoidance_vector = avoidance_vectors * weights
             # Sum up the avoidance vectors to get the net avoidance direction
             net_avoidance_vector = np.sum(avoidance_vectors, axis=0)
+            # net_avoidance_vector = np.sum(weighted_avoidance_vector, axis=0)
             net_avoidance_vector = net_avoidance_vector / np.linalg.norm(net_avoidance_vector)
+            
             # Get angle of avoidance
             # There were a lot of errors here
             if net_avoidance_vector.size >= 2:
