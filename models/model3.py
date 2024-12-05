@@ -441,6 +441,7 @@ def step(
     - Update the positions.
     - Compute the new velocities for the remaining birds.
     '''
+
     # Update positions based on velocity and time step
     x += vx * dt
     y += vy * dt
@@ -498,23 +499,35 @@ def step(
         # Get obstacle avoidance velocity
         obstacle_vx, obstacle_vy = obstacle_velocities[i]
 
-        # Update new velocity to only consider obstacle avoidance + wind only
+        # Calculate velocities for alignment, cohesion, etc.
+        neighbours, too_close = proximity_lists(i, x, y, R_bird, R_min)
+        centre_vx, centre_vy = centre_vel(i, x, y, neighbours)
+        avoid_vx, avoid_vy = avoid_vel(i, x, y, too_close)
+        match_vx, match_vy = match_vel(i, vx, vy, neighbours)
+        migrate_vx, migrate_vy = migratory_vel(goal_x, goal_y)
+
+        # Update new velocity to consider other contributions     
         vx_new[i], vy_new[i] = update_velocity(
             i, vx, vy,
             obstacle_vx, obstacle_vy,
-            centre_vx=0, centre_vy=0,  
-            avoid_vx=0, avoid_vy=0,
-            match_vx=0, match_vy=0,
-            migrate_vx=0, migrate_vy=0,
-            bird_speed_max = bird_speed_max,
-            lam_a=0, lam_c=0, lam_m=0, lam_o=lam_o, lam_g=0, lam_w=0,
+            centre_vx=centre_vx, centre_vy=centre_vy,
+            avoid_vx=avoid_vx, avoid_vy=avoid_vy,
+            match_vx=match_vx, match_vy=match_vy,
+            migrate_vx=migrate_vx, migrate_vy=migrate_vy,
+            bird_speed_max=bird_speed_max,
+            lam_a=lam_a, lam_c=lam_c, lam_m=lam_m, lam_o=lam_o, lam_g=lam_g, lam_w=lam_w,
             wind_vx = wind_vx, wind_vy = wind_vy
         )
 
-    # Step 3: Update velocities for all other birds
+
+    # Update velocities for all other birds
     for i in range(N):
 
         if i not in obstacle_avoiding_birds:
+
+            # Obstacle avoidance already handled
+            obstacle_vx = 0
+            obstacle_vy = 0
 
             # Calculate velocities for alignment, cohesion, etc.
             neighbours, too_close = proximity_lists(i, x, y, R_bird, R_min)
@@ -535,7 +548,7 @@ def step(
 
             vx_new[i], vy_new[i] = update_velocity(
                 i, vx, vy,
-                obstacle_vx=0, obstacle_vy=0,  # Obstacle avoidance already handled
+                obstacle_vx, obstacle_vy,  # Obstacle avoidance already handled
                 centre_vx=centre_vx, centre_vy=centre_vy,
                 avoid_vx=avoid_vx, avoid_vy=avoid_vy,
                 match_vx=match_vx, match_vy=match_vy,
