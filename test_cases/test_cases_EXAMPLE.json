@@ -1,0 +1,16 @@
+{
+  "test_000": {
+    "num_obstacles": 30,
+    "x_spacing": 400,
+    "y_spacing": 700,
+    "offset": 0,
+    "beta": 0
+  },
+  "test_001": {
+    "num_obstacles": 30,
+    "x_spacing": 400,
+    "y_spacing": 700,
+    "offset": 350.0,
+    "beta": 0
+  }
+}

@@ -43,7 +43,7 @@ class params_default:
         # Time & Space
         # -------------------------------------------------------------------------
         self.L = 7000                 # Size of box (L*L = Area of a wind farm)
-        self.dt = 0.2                 # Time step
+        self.dt = 1.5                 # Time step
         self.T = self.L/self.v0       # Minimum simulation length (seconds)
         self.Nt = int(self.T/self.dt) # No. of time steps
 

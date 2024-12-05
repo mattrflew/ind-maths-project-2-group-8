@@ -142,16 +142,16 @@ def number_of_flocks(x, y, r_effective):
 
 
 
-def return_metric_statistics(dispersion_values, offset_values, clustering_coefficients, num_neighbours):
+def return_metric_statistics(dispersion_values, offset_values, clustering_coefficients):
     '''
     Returns the averaged metrics (i.e. results of the simulation)
     '''
     avg_dispersion = np.mean(dispersion_values)
     avg_offset = np.mean(offset_values)
     avg_clustering_coefficient = np.mean(clustering_coefficients)
-    avg_num_neighbours = np.mean(num_neighbours)
+
     
-    return avg_dispersion, avg_offset, avg_clustering_coefficient, avg_num_neighbours
+    return avg_dispersion, avg_offset, avg_clustering_coefficient
 
 
 # -----------------------------------------------------------------------------

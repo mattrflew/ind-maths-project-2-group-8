@@ -277,6 +277,7 @@ def run_model1(params, plot = False):
     vy_wind_list = []
     clustering_coefficients = []
     dispersions = []
+    offset_values = []
     
     
     # Do each step, updating the quiver and plotting the new one
@@ -315,10 +316,11 @@ def run_model1(params, plot = False):
         
         # Append metrics
         dispersions.append(calculate_dispersion(x, y))
+        offset_values.append(calculate_path_offset(x, y, params.goal_x, params.goal_y))
         clustering_coefficients.append(get_clustering_coefficient(vx, vy, params.v0, vx_wind, vy_wind, params.N))
         
     # Number of flocks at end
     num_flocks = number_of_flocks(x, y, r_effective)
     
-    return dispersions, clustering_coefficients, num_flocks
+    return dispersions, offset_values, clustering_coefficients, num_flocks
     

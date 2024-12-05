@@ -1,3 +1,5 @@
 numpy
 matplotlib
 IPython
+sklearn
+pandas
