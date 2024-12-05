@@ -52,11 +52,11 @@ class params_default:
         # -------------------------------------------------------------------------
         self.vmax = 17.38              # Maximum velocity (?)
         self.eta = 0.15                # maximum random fluctuation in angle (in radians)
-        self.R_bird = 30              # Interaction radius (bird-bird)
+        self.R_bird = 50              # Interaction radius (bird-bird)
         self.Rsq = self.R_bird**2     # Square of the interaction radius
         self.N = 300                  # number of birds
         self.fov_angle = np.pi        # Field of View of birds
-        self.R_min = 2                # a minimum distance they would like to maintain, r.
+        self.R_min = 5               # a minimum distance they would like to maintain, r.
 
         self.R_obs = 300              # Viewing radius (bird - obstacles)
         self.R_obs_min = 300          # Minimum radius (bird - obstacles)
@@ -76,12 +76,12 @@ class params_default:
         # -------------------------------------------------------------------------
         # 'Mixing' parameters
         # -------------------------------------------------------------------------
-        self.lam_c = 0.1              # Centering weight
-        self.lam_a = 0.15             # Avoidance weight
-        self.lam_m = 0.1              # Matching weight
-        self.lam_o = 0.0              # Obstacle weight
-        self.lam_g = 0.05             # Migratory weight
-        self.lam_w = 0.1              # Wind weight
+        self.lam_c = 15 # centering
+        self.lam_a = 25 # bird avoidance
+        self.lam_m = 15  # matching
+        self.lam_g = 20  # migratory behavior
+        self.lam_w = 0  # wind influence
+        self.lam_o = 40 # obstacle avoidance
 
         # -------------------------------------------------------------------------
         # Obstacles
