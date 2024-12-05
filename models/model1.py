@@ -98,72 +98,58 @@ def get_obstacles_within_radius(x_bird, y_bird, theta_bird, x_obstacle, y_obstac
 def update_theta(x, y, theta, Rsq, x_obstacle, y_obstacle, R_obs, eta, N, fov_angle):
     '''
     We will do this per bird, since we need to see if each one is within distance of obstacles or not
-    
     '''
-    # Initialize new theta array
+    
+    # Initialize the new theta array
     theta_new = theta.copy()
-    
-    # Get the mean theta from the neighbours
-    mean_theta = get_mean_theta_neighbours(x, y, theta, Rsq, N)
-    
-    # If no obstacles:
-    if x_obstacle.size == 0 and y_obstacle.size == 0:
-        theta_new = add_noise_theta(mean_theta, eta, N)
-        return theta_new
-    
-    # Update theta based on obstacles
-    for i in range(N):
-        # Determine if obstacles in radius
-        x_obs_in_radius, y_obs_in_radius, distances = get_obstacles_within_radius(x[i], y[i], theta_new[i], x_obstacle, y_obstacle, R_obs, fov_angle)
 
-        # avoid division by zero
-        distances[distances == 0] = np.finfo(float).eps
+    # Get the mean direction (theta) from neighbors for each bird
+    mean_theta = get_mean_theta_neighbours(x, y, theta, Rsq, N)
+
+    # If no obstacles
+    if x_obstacle.size == 0 and y_obstacle.size == 0:
+        return add_noise_theta(mean_theta, eta, N)
+
+    # For each bird...
+    for i in range(N):
         
-        # Only continue if there are obstacles in radius
+        # Find obstacles within the bird's radius and FoV
+        x_obs_in_radius, y_obs_in_radius, distances = get_obstacles_within_radius(x[i], y[i], theta[i], x_obstacle, y_obstacle, R_obs, fov_angle)
+
+        # Avoid division by zero
+        distances[distances == 0] = np.finfo(float).eps
+
+        # If obstacles in radius
         if np.any(distances):
             
-            # Naively avoid obstacle by pointing in opposite direction
+            # Compute vectors pointing away from obstacles
             avoidance_vectors = np.array([x[i] - x_obs_in_radius, y[i] - y_obs_in_radius])
 
-            # # Normalise by distance (this should(?) make closer distances more important)
-            # avoidance_vectors = avoidance_vectors/distances
-            # weights = 1/ (distances + 1e-5)
+            # Compute the net avoidance direction
+            net_avoidance_vector = np.sum(avoidance_vectors, axis=1)
+            net_avoidance_vector /= np.linalg.norm(net_avoidance_vector) #normalisation term
 
-            # weighted_avoidance_vector = avoidance_vectors * weights
-            # Sum up the avoidance vectors to get the net avoidance direction
-            net_avoidance_vector = np.sum(avoidance_vectors, axis=0)
-            # net_avoidance_vector = np.sum(weighted_avoidance_vector, axis=0)
-            net_avoidance_vector = net_avoidance_vector / np.linalg.norm(net_avoidance_vector)
-            
-            # Get angle of avoidance
-            # There were a lot of errors here
-            if net_avoidance_vector.size >= 2:
-                
-                # Get the angle of the net avoidance vector
-                avoidance_theta = np.arctan2(net_avoidance_vector[1], net_avoidance_vector[0])
+            # Calculate the angle of the net avoidance vector
+            avoidance_theta = np.arctan2(net_avoidance_vector[1], net_avoidance_vector[0])
 
-                # Limit the amount a bird can turn in one time step
-                max_turn_angle = np.radians(10)  # Maximum allowable turn
-                avoidance_theta = np.clip(avoidance_theta, -max_turn_angle, max_turn_angle)
-                
-                random_sign = np.random.choice([-1, 1])
-                avoidance_theta = avoidance_theta * random_sign
-                
-                # Calculate weighted average between avoidance theta and mean theta from neighbors
-                avoidance_weight = 0.5
-                theta_new[i] = (1 - avoidance_weight) * mean_theta[i] + avoidance_weight * avoidance_theta
-            
-            else:
-                # If that didn't work, just go to mean theta
-                theta_new[i] = mean_theta[i]
-    
+            # Limit the turn angle to a maximum value, accounting for bird's current direction
+            max_turn_angle = np.radians(20)
+            angular_difference = np.arctan2(
+                np.sin(avoidance_theta - theta[i]), np.cos(avoidance_theta - theta[i])
+            )
+            limited_turn = np.clip(angular_difference, -max_turn_angle, max_turn_angle)
+
+            # Calculate the final direction with a weighted average of avoidance and neighbor alignment
+            avoidance_weight = 0.5
+            theta_new[i] = (1 - avoidance_weight) * mean_theta[i] + avoidance_weight * (theta[i] + limited_turn)
         
-        # If no obstacle, use theta from neighbours and migration goal
         else:
+            # If no obstacles nearby, follow the mean theta from neighbors
             theta_new[i] = mean_theta[i]
-    
+
+    # Add noise to the updated theta values
     theta_new = add_noise_theta(theta_new, eta, N)
-    
+
     return theta_new
 
 
@@ -266,7 +252,8 @@ def run_model1(params, plot = False):
         v0 = params.v0, 
         theta_start = params.theta_start, 
         eta = params.eta,
-        method = params.bird_method
+        method = params.bird_method,
+        min_distance = params.R_min
     )
 
     # Set up a figure

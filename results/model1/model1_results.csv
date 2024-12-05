@@ -1,1 +1,8 @@
+<<<<<<< HEAD
 Test Case,Avg Dispersion,Avg Distance to Goal,Avg Clustering Coefficient,Num Flocks
+=======
+Test Case,Avg Dispersion,Avg Distance to Goal,Avg Clustering Coefficient,Num Flocks
+test_031,25.27935625599088,5347.739622218792,0.9989640653563185,1
+test_baseline,33.01030845595626,127.83150226496689,0.9990445706225669,2
+test_000,136.4410655102659,6659.553763152906,0.9748296629281897,5
+>>>>>>> 2e8fdbf09070f7eb12e07d86fdd6acb6daf7432f

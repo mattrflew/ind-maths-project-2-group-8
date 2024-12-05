@@ -50,8 +50,8 @@ class params_default:
         # -------------------------------------------------------------------------
         # Birds
         # -------------------------------------------------------------------------
-        self.vmax = 17.38             # Maximum velocity (?)
-        self.eta = 0.2                # maximum random fluctuation in angle (in radians)
+        self.vmax = 17.38              # Maximum velocity (?)
+        self.eta = 0.15                # maximum random fluctuation in angle (in radians)
         self.R_bird = 30              # Interaction radius (bird-bird)
         self.Rsq = self.R_bird**2     # Square of the interaction radius
         self.N = 300                  # number of birds
