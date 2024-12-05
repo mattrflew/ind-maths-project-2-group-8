@@ -132,7 +132,7 @@ def update_theta(x, y, theta, Rsq, x_obstacle, y_obstacle, R_obs, eta, N, fov_an
                 # Limit the amount a bird can turn in one time step
                 angle_dir = np.sign(avoidance_theta)
                 
-                avoidance_theta_mag = np.min([np.radians(30), avoidance_theta])
+                avoidance_theta_mag = np.min([np.radians(50), avoidance_theta])
                 
                 avoidance_theta = avoidance_theta_mag*angle_dir
                 
@@ -247,7 +247,7 @@ def run_model1(params, plot = False):
     )
 
     # Fetch the initial birds in the environment
-    x, y, vx, vy, theta = initialize_birds(
+    x, y, vx, vy, theta, r_effective = initialize_birds(
         N = params.N, 
         L = params.L, 
         v0 = params.v0, 
@@ -317,6 +317,8 @@ def run_model1(params, plot = False):
         dispersions.append(calculate_dispersion(x, y))
         clustering_coefficients.append(get_clustering_coefficient(vx, vy, params.v0, vx_wind, vy_wind, params.N))
         
-        
-    return dispersions, clustering_coefficients
+    # Number of flocks at end
+    num_flocks = number_of_flocks(x, y, r_effective)
+    
+    return dispersions, clustering_coefficients, num_flocks
     

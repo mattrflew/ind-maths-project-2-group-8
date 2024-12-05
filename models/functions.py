@@ -19,6 +19,7 @@ from .initialise import *
 import numpy as np
 import matplotlib.pyplot as plt
 from IPython.display import display, clear_output
+from sklearn.cluster import DBSCAN
 
 # =============================================================================
 # Helper Functions
@@ -125,6 +126,21 @@ def number_nearest_neightbours(x, y, Rsq, N):
         num_neighbours.append(sum(neighbours))
     
     return num_neighbours
+
+
+def number_of_flocks(x, y, r_effective):
+
+    positions = np.column_stack((x,y))
+
+    # Apply DBSCAN
+    clustering = DBSCAN(eps=r_effective, min_samples=1).fit(positions)
+
+    # Number of unique clusters
+    num_flocks = len(set(clustering.labels_)) - (1 if -1 in clustering.labels_ else 0)
+
+    return num_flocks
+
+
 
 def return_metric_statistics(dispersion_values, offset_values, clustering_coefficients, num_neighbours):
     '''

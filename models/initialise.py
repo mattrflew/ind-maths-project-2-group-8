@@ -204,8 +204,11 @@ def initialize_birds_triangle(N, L, v0, theta_start, eta):
     vx = v0 * np.cos(theta)
     vy = v0 * np.sin(theta)
     
-    return x, y, vx, vy, theta
-
+    # Calculate the effective radius of the flock
+    r_effective = (max(x) - min(x))/2
+    r_effective = r_effective[0]
+    
+    return x, y, vx, vy, theta, r_effective
 
 # =============================================================================
 # Initialise Obstacles Functions
