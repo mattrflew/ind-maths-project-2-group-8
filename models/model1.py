@@ -129,6 +129,13 @@ def update_theta(x, y, theta, Rsq, x_obstacle, y_obstacle, R_obs, eta, N, fov_an
                 # Get the angle of the net avoidance vector
                 avoidance_theta = np.arctan2(net_avoidance_vector[1], net_avoidance_vector[0])
 
+                # Limit the amount a bird can turn in one time step
+                angle_dir = np.sign(avoidance_theta)
+                
+                avoidance_theta_mag = np.min([np.radians(10), avoidance_theta])
+                
+                avoidance_theta = avoidance_theta_mag*angle_dir
+                
                 # Calculate weighted average between avoidance theta and mean theta from neighbors
                 avoidance_weight = 0.5
                 theta_new[i] = (1 - avoidance_weight) * mean_theta[i] + avoidance_weight * avoidance_theta
