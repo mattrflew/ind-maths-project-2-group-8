@@ -132,7 +132,7 @@ def update_theta(x, y, theta, Rsq, x_obstacle, y_obstacle, R_obs, eta, N, fov_an
                 # Limit the amount a bird can turn in one time step
                 angle_dir = np.sign(avoidance_theta)
                 
-                avoidance_theta_mag = np.min([np.radians(10), avoidance_theta])
+                avoidance_theta_mag = np.min([np.radians(20), avoidance_theta])
                 
                 avoidance_theta = avoidance_theta_mag*angle_dir
                 
