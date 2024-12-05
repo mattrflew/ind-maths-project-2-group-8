@@ -50,7 +50,7 @@ class params_default:
         # -------------------------------------------------------------------------
         # Birds
         # -------------------------------------------------------------------------
-        self.vmax = 30.0              # Maximum velocity (?)
+        self.vmax = 17.38             # Maximum velocity (?)
         self.eta = 0.2                # maximum random fluctuation in angle (in radians)
         self.R_bird = 30              # Interaction radius (bird-bird)
         self.Rsq = self.R_bird**2     # Square of the interaction radius
@@ -118,9 +118,9 @@ class params_default:
         # Wind
         # -------------------------------------------------------------------------
         self.v0_wind = 0                           # Velocity of wind (constant)
-        self.v_wind_noise = 1                      # Maximum random fluctuation in wind velocity (in same units as v0_wind)
+        self.v_wind_noise = 0                      # Maximum random fluctuation in wind velocity (in same units as v0_wind)
         self.wind_theta = np.pi/2                  # Wind direction (in radians)
-        self.wind_theta_noise = self.eta                  # Maximum random fluctuation in wind angle (in radians)
+        self.wind_theta_noise = self.eta           # Maximum random fluctuation in wind angle (in radians)
         self.wind_method = "constant"              # Options: "constant", "dynamic", "spatial", "combined"
         self.f = 0.05                              # Frequency of wind variation
         self.A_x = 1.0                             # Amplitude of wind in x direction

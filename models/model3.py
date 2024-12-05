@@ -249,7 +249,7 @@ def obstacle_vel(i, x, y, vx, vy, bird_vmax, R_obs_min, R_obs, x_obstacle_list, 
     safe_point = closest_edge + 2 * R_obs_min * adjusted_outward_vec
 
     # Compute steering velocity
-    steer_vec = normalise(safe_point - bird_loc)
+    steer_vec = safe_point - bird_loc
     obstacle_vx, obstacle_vy = steer_vec
 
     return obstacle_vx, obstacle_vy
@@ -302,109 +302,7 @@ def update_velocity(i, vx, vy,
 # Update steps
 # -----------------------------------------------------------------------------
 
-def step(
-    x,
-    y,
-    vx,
-    vy,
-    L,
-    R_bird,
-    R_min,
-    R_obs,
-    R_obs_min,
-    N,
-    dt,
-    bird_speed_max,
-    lam_a,
-    lam_c,
-    lam_m,
-    lam_g,
-    lam_o,
-    lam_w,
-    goal_x,
-    goal_y,
-    x_obstacle_list,
-    y_obstacle_list,
-    v0_wind, 
-    v_wind_noise, 
-    wind_theta,
-    wind_theta_noise,
-    A_x,
-    A_y,
-    k,
-    f,
-    wind_method,
-    t
-):
-    
-    '''
-    Compute a step in the dynamics:
-    - update the positions
-    - compute the new velocities
-    '''
-    
-    # Update positions based on velocity and time step
-    x += vx * dt
-    y += vy * dt
-    
-    # Apply periodic boundary conditions
-    # x %= L
-    # y %= L
-    
-    # Initialise the new velocities
-    vx_new = np.zeros(N)
-    vy_new = np.zeros(N)
-    
-    # Get combined wind velocity components
-    vx_wind, vy_wind = wind(x, y, t, v0_wind, v_wind_noise, wind_theta, wind_theta_noise, A_x, A_y, k, f, wind_method)
 
-    # For each bird:
-    for i in range(N):
-
-        # If wind is scalar then
-        if np.isscalar(vx_wind):
-            wind_vx = vx_wind
-            wind_vy = vy_wind
-
-        # If wind is vector then
-        else:
-            wind_vx = vx_wind[i]
-            wind_vy = vy_wind[i]
-        
-        # Find neighbouring birds and those that are too close
-        neighbours, too_close = proximity_lists(i, x, y, R_bird, R_min)
-        
-        # Obstacle avoidance component
-        obstacle_vx, obstacle_vy = obstacle_vel(i, x, y, vx, vy, bird_speed_max, R_obs_min, R_obs, x_obstacle_list, y_obstacle_list, vx_wind, vy_wind)
-        
-        # Center of mass component
-        centre_vx, centre_vy = centre_vel(i, x, y, neighbours)
-        
-        # Bird avoidance component
-        avoid_vx, avoid_vy = avoid_vel(i, x, y, too_close)
-        
-        # Matching component
-        match_vx, match_vy = match_vel(i, vx, vy, neighbours)
-        
-        # Migrating component
-        migrate_vx, migrate_vy = migratory_vel(goal_x, goal_y)
-           
-        # Update velocity with limits
-        vx_new[i], vy_new[i] = update_velocity(i, vx, vy, 
-                                    obstacle_vx, obstacle_vy, 
-                                    centre_vx, centre_vy, 
-                                    avoid_vx, avoid_vy, 
-                                    match_vx, match_vy, 
-                                    migrate_vx, migrate_vy, 
-                                    bird_speed_max, 
-                                    lam_a, lam_c, lam_m, lam_o, lam_g, lam_w,
-                                    wind_vx, wind_vy)
-    
-    # Update new velocities
-    vx = np.array(vx_new).reshape(-1, 1)
-    vy = np.array(vy_new).reshape(-1, 1)
-    
-    return x, y, vx, vy, vx_wind, vy_wind
 
 def is_wind_scalar(i, vx_wind, vy_wind):
         
@@ -571,6 +469,110 @@ def step(
     
     return x, y, vx, vy, vx_wind, vy_wind
 
+def step(
+    x,
+    y,
+    vx,
+    vy,
+    L,
+    R_bird,
+    R_min,
+    R_obs,
+    R_obs_min,
+    N,
+    dt,
+    bird_speed_max,
+    lam_a,
+    lam_c,
+    lam_m,
+    lam_g,
+    lam_o,
+    lam_w,
+    goal_x,
+    goal_y,
+    x_obstacle_list,
+    y_obstacle_list,
+    v0_wind, 
+    v_wind_noise, 
+    wind_theta,
+    wind_theta_noise,
+    A_x,
+    A_y,
+    k,
+    f,
+    wind_method,
+    t
+):
+    
+    '''
+    Compute a step in the dynamics:
+    - update the positions
+    - compute the new velocities
+    '''
+    
+    # Update positions based on velocity and time step
+    x += vx * dt
+    y += vy * dt
+    
+    # Apply periodic boundary conditions
+    # x %= L
+    # y %= L
+    
+    # Initialise the new velocities
+    vx_new = np.zeros(N)
+    vy_new = np.zeros(N)
+    
+    # Get combined wind velocity components
+    vx_wind, vy_wind = wind(x, y, t, v0_wind, v_wind_noise, wind_theta, wind_theta_noise, A_x, A_y, k, f, wind_method)
+
+    # For each bird:
+    for i in range(N):
+
+        # If wind is scalar then
+        if np.isscalar(vx_wind):
+            wind_vx = vx_wind
+            wind_vy = vy_wind
+
+        # If wind is vector then
+        else:
+            wind_vx = vx_wind[i]
+            wind_vy = vy_wind[i]
+        
+        # Find neighbouring birds and those that are too close
+        neighbours, too_close = proximity_lists(i, x, y, R_bird, R_min)
+        
+        # Obstacle avoidance component
+        obstacle_vx, obstacle_vy = obstacle_vel(i, x, y, vx, vy, bird_speed_max, R_obs_min, R_obs, x_obstacle_list, y_obstacle_list, vx_wind, vy_wind)
+        
+        # Center of mass component
+        centre_vx, centre_vy = centre_vel(i, x, y, neighbours)
+        
+        # Bird avoidance component
+        avoid_vx, avoid_vy = avoid_vel(i, x, y, too_close)
+        
+        # Matching component
+        match_vx, match_vy = match_vel(i, vx, vy, neighbours)
+        
+        # Migrating component
+        migrate_vx, migrate_vy = migratory_vel(goal_x, goal_y)
+           
+        # Update velocity with limits
+        vx_new[i], vy_new[i] = update_velocity(i, vx, vy, 
+                                    obstacle_vx, obstacle_vy, 
+                                    centre_vx, centre_vy, 
+                                    avoid_vx, avoid_vy, 
+                                    match_vx, match_vy, 
+                                    migrate_vx, migrate_vy, 
+                                    bird_speed_max, 
+                                    lam_a, lam_c, lam_m, lam_o, lam_g, lam_w,
+                                    wind_vx, wind_vy)
+    
+    # Update new velocities
+    vx = np.array(vx_new).reshape(-1, 1)
+    vy = np.array(vy_new).reshape(-1, 1)
+    
+    return x, y, vx, vy, vx_wind, vy_wind
+
 
 # -----------------------------------------------------------------------------
 # Run Model 3
@@ -632,8 +634,7 @@ def run_model3(params, plot = False):
     ax.get_yaxis().set_visible(False)
 
     # Metrics storage 
-    dispersion_values = []
-    offset_values = []
+    dispersions = []
     clustering_coefficients = []
 
     # Do each step, updating the quiver and plot the new one
@@ -682,8 +683,13 @@ def run_model3(params, plot = False):
             display(fig)
         
         # Append metric values
-        dispersion_values.append(calculate_dispersion(x, y))
-        offset_values.append(calculate_path_offset(x, y, params.goal_x, params.goal_y))
+        dispersions.append(calculate_dispersion(x, y))
         clustering_coefficients.append(get_clustering_coefficient(vx, vy, params.v0, vx_wind, vy_wind, params.N))
+
+    # Distances to goal at end
+    distances_to_goal = calculate_distance_to_goal(x, y, params.goal_x_loc, params.goal_y_loc)
+    
+    # Number of flocks at end
+    num_flocks = number_of_flocks(x, y, r_effective)
         
-    return dispersion_values, offset_values, clustering_coefficients
+    return dispersions, distances_to_goal, clustering_coefficients, num_flocks
