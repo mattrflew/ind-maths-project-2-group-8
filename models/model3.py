@@ -227,8 +227,14 @@ def obstacle_vel(i, x, y, vx, vy, bird_vmax, R_obs_min, R_obs, x_obstacle_list, 
     projections = [np.dot(obs - bird_loc, perp_vec) for obs in coll_obstacle_points]
 
     # Selects the two points on obstacle's silhouette that give the biggest
-    # projections along a perpendicular vector to the bird's travel vector. 
-    silhouette_edges = coll_obstacle_points[np.argsort(projections)[-2:]]
+    # and smallest projection along a perpendicular vector to the bird's travel vector.
+
+    # Find the indices of the smallest and largest projections
+    min_idx = np.argmin(projections)  # Index of the smallest projection
+    max_idx = np.argmax(projections)  # Index of the largest projection
+
+    # Select the corresponding points on the obstacle
+    silhouette_edges = np.array([coll_obstacle_points[min_idx], coll_obstacle_points[max_idx]]) 
 
     # Select the edge closest to the bird
     closest_edge = min(silhouette_edges, key=lambda edge: np.linalg.norm(edge - bird_loc))
@@ -400,6 +406,19 @@ def step(
     
     return x, y, vx, vy, vx_wind, vy_wind
 
+def is_wind_scalar(i, vx_wind, vy_wind):
+        
+    # If wind is scalar then
+    if np.isscalar(vx_wind):
+        wind_vx = vx_wind
+        wind_vy = vy_wind
+
+    # If wind is vector then
+    else:
+        wind_vx = vx_wind[i]
+        wind_vy = vy_wind[i]
+
+    return wind_vx, wind_vy
 
 def step(
     x,
@@ -442,10 +461,6 @@ def step(
     - Compute the new velocities for the remaining birds.
     '''
 
-    # Update positions based on velocity and time step
-    x += vx * dt
-    y += vy * dt
-
     # Initialize new velocities
     vx_new = np.zeros(N)
     vy_new = np.zeros(N)
@@ -457,18 +472,11 @@ def step(
     obstacle_avoiding_birds = []
     obstacle_velocities = []
 
-    # Identify birds requiring obstacle avoidance
+    # Identify birds requiring obstacle avoidance and calculate obstacle velocities
     for i in range(N):
 
-        # If wind is scalar then
-        if np.isscalar(vx_wind):
-            wind_vx = vx_wind
-            wind_vy = vy_wind
-
-        # If wind is vector then
-        else:
-            wind_vx = vx_wind[i]
-            wind_vy = vy_wind[i]
+        # Calculate wind component
+        wind_vx, wind_vy = is_wind_scalar(i, vx_wind, vy_wind)
 
         obstacle_vx, obstacle_vy = obstacle_vel(
             i, x, y, vx, vy, bird_speed_max, R_obs_min, R_obs, x_obstacle_list, y_obstacle_list, vx_wind, vy_wind
@@ -480,34 +488,28 @@ def step(
             obstacle_avoiding_birds.append(i)
             obstacle_velocities.append((obstacle_vx, obstacle_vy))
 
+        # Else set this component to 0
         else:
             obstacle_velocities.append((0, 0))
 
-    # Update velocities for obstacle-avoiding birds first
+    # Update positions for obstacle-avoiding birds first, 
+    # as these will be at the edges of the flock
     for i in obstacle_avoiding_birds:
 
-        # If wind is scalar then
-        if np.isscalar(vx_wind):
-            wind_vx = vx_wind
-            wind_vy = vy_wind
-
-        # If wind is vector then
-        else:
-            wind_vx = vx_wind[i]
-            wind_vy = vy_wind[i]
+        # Get wind component
+        wind_vx, wind_vy = is_wind_scalar(i, vx_wind, vy_wind)
 
         # Get obstacle avoidance velocity
         obstacle_vx, obstacle_vy = obstacle_velocities[i]
 
-        # Calculate velocities for alignment, cohesion, etc.
-        neighbours, too_close = proximity_lists(i, x, y, R_bird, R_min)
-        centre_vx, centre_vy = centre_vel(i, x, y, neighbours)
-        avoid_vx, avoid_vy = avoid_vel(i, x, y, too_close)
-        match_vx, match_vy = match_vel(i, vx, vy, neighbours)
-        migrate_vx, migrate_vy = migratory_vel(goal_x, goal_y)
+        # Set other velocities to 0 to prioritise obstacle avoidance
+        centre_vx, centre_vy = 0,0
+        avoid_vx, avoid_vy = 0,0
+        match_vx, match_vy = 0,0
+        migrate_vx, migrate_vy = 0,0
 
-        # Update new velocity to consider other contributions     
-        vx_new[i], vy_new[i] = update_velocity(
+        # Update current velocites for obstacle avoiding birds   
+        vx[i], vy[i] = update_velocity(
             i, vx, vy,
             obstacle_vx, obstacle_vy,
             centre_vx=centre_vx, centre_vy=centre_vy,
@@ -519,6 +521,15 @@ def step(
             wind_vx = wind_vx, wind_vy = wind_vy
         )
 
+        # Update new velocities
+        vx_new[i] = vx[i]
+        vy_new[i] = vy[i]
+
+        # Update position
+        x[i] += vx[i] * dt
+        y[i] += vy[i] * dt
+
+
 
     # Update velocities for all other birds
     for i in range(N):
@@ -526,8 +537,7 @@ def step(
         if i not in obstacle_avoiding_birds:
 
             # Obstacle avoidance already handled
-            obstacle_vx = 0
-            obstacle_vy = 0
+            obstacle_vx, obstacle_vy = obstacle_velocities[i]
 
             # Calculate velocities for alignment, cohesion, etc.
             neighbours, too_close = proximity_lists(i, x, y, R_bird, R_min)
@@ -536,15 +546,8 @@ def step(
             match_vx, match_vy = match_vel(i, vx, vy, neighbours)
             migrate_vx, migrate_vy = migratory_vel(goal_x, goal_y)
 
-            # If wind is scalar then
-            if np.isscalar(vx_wind):
-                wind_vx = vx_wind
-                wind_vy = vy_wind
-
-            # If wind is vector then
-            else:
-                wind_vx = vx_wind[i]
-                wind_vy = vy_wind[i]
+            # Calculate wind component
+            wind_vx, wind_vy = is_wind_scalar(i, vx_wind, vy_wind)
 
             vx_new[i], vy_new[i] = update_velocity(
                 i, vx, vy,
@@ -557,6 +560,10 @@ def step(
                 lam_a=lam_a, lam_c=lam_c, lam_m=lam_m, lam_o=0, lam_g=lam_g, lam_w=lam_w,
                 wind_vx = wind_vx, wind_vy = wind_vy
             )
+
+            # Update position
+            x[i] += vx_new[i] * dt
+            y[i] += vy_new[i] * dt
 
     # Update velocities and return
     vx = vx_new.reshape(-1, 1)
@@ -600,7 +607,8 @@ def run_model3(params, plot = False):
         v0 = params.v0, 
         theta_start = params.theta_start, 
         eta = params.eta,
-        method = params.bird_method
+        method = params.bird_method,
+        min_distance = params.R_min
     )
 
     # Set up a figure
@@ -638,7 +646,7 @@ def run_model3(params, plot = False):
             vy=vy,
             L=params.L,
             R_bird=params.R_bird,
-            R_min=params.r_min,
+            R_min=params.R_min,
             R_obs = params.R_obs,
             R_obs_min = params.R_obs_min,
             N=params.N,

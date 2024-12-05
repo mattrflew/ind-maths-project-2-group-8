@@ -56,10 +56,10 @@ class params_default:
         self.Rsq = self.R_bird**2     # Square of the interaction radius
         self.N = 300                  # number of birds
         self.fov_angle = np.pi        # Field of View of birds
-        self.r_min = 2                # a minimum distance they would like to maintain, r.
+        self.R_min = 2                # a minimum distance they would like to maintain, r.
 
         self.R_obs = 300              # Viewing radius (bird - obstacles)
-        self.R_obs_min = 200          # Minimum radius (bird - obstacles)
+        self.R_obs_min = 300          # Minimum radius (bird - obstacles)
         
         # Migratory goal vector
         self.goal_x = 0               # X-component of common goal direction vector
