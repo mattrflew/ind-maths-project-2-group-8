@@ -132,7 +132,7 @@ def update_theta(x, y, theta, Rsq, x_obstacle, y_obstacle, R_obs, eta, N, fov_an
                 # Limit the amount a bird can turn in one time step
                 angle_dir = np.sign(avoidance_theta)
                 
-                avoidance_theta_mag = np.min([np.radians(20), avoidance_theta])
+                avoidance_theta_mag = np.min([np.radians(30), avoidance_theta])
                 
                 avoidance_theta = avoidance_theta_mag*angle_dir
                 
@@ -264,7 +264,7 @@ def run_model1(params, plot = False):
         ax.plot(xx, yy, 'r-')
 
     # Plot initial quivers
-    q = plt.quiver(x,y,vx,vy)
+    q = plt.quiver(x,y,vx,vy,  scale=4, angles='xy', scale_units='xy', width=0.005)
 
     # Set figure parameters
     ax.set(xlim=(0, params.L), ylim=(0, params.L))
