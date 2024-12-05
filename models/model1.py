@@ -105,6 +105,11 @@ def update_theta(x, y, theta, Rsq, x_obstacle, y_obstacle, R_obs, eta, N, fov_an
     # Get the mean theta from the neighbours
     mean_theta = get_mean_theta_neighbours(x, y, theta, Rsq, N)
     
+    # If no obstacles:
+    if x_obstacle.size == 0 and y_obstacle.size == 0:
+        theta_new = add_noise_theta(mean_theta, eta, N)
+        return theta_new
+    
     # Update theta based on obstacles
     for i in range(N):
         # Determine if obstacles in radius

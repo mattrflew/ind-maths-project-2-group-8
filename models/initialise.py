@@ -439,6 +439,9 @@ def initialize_obstacles(L, num_obstacles, nrows, ncols, shape, Rx, Ry, x_spacin
     '''
     Master function to initialise obstacles and get lists of their x, y points
     '''
+    if num_obstacles == 0:
+        return np.array([]), np.array([]), np.array([]), np.array([])
+    
     x_centres, y_centres = get_obstacle_rectangle_grid(L, nrows, ncols, x_spacing, y_spacing, offset, beta)
     
     # Initalise lists
