@@ -1,0 +1,101 @@
+{
+    "test_008_wind_speed_4": {
+        "num_obstacles": 30,
+        "nrows": 3,
+        "ncols": 10,
+        "x_spacing": 600,
+        "y_spacing": 700,
+        "offset": 0,
+        "beta": 0,
+        "v0_wind": 4,
+        "v_wind_noise": 1
+    },
+    "test_008_wind_speed_13": {
+        "num_obstacles": 30,
+        "nrows": 3,
+        "ncols": 10,
+        "x_spacing": 600,
+        "y_spacing": 700,
+        "offset": 0,
+        "beta": 0,
+        "v0_wind": 13,
+        "v_wind_noise": 1
+    },
+    "test_008_wind_speed_25": {
+        "num_obstacles": 30,
+        "nrows": 3,
+        "ncols": 10,
+        "x_spacing": 600,
+        "y_spacing": 700,
+        "offset": 0,
+        "beta": 0,
+        "v0_wind": 25,
+        "v_wind_noise": 1
+    },
+    "test_015_wind_speed_4": {
+        "num_obstacles": 30,
+        "nrows": 3,
+        "ncols": 10,
+        "x_spacing": 600,
+        "y_spacing": 1000,
+        "offset": 500.0,
+        "beta": 0.5235987755982988,
+        "v0_wind": 4,
+        "v_wind_noise": 1
+    },
+    "test_015_wind_speed_13": {
+        "num_obstacles": 30,
+        "nrows": 3,
+        "ncols": 10,
+        "x_spacing": 600,
+        "y_spacing": 1000,
+        "offset": 500.0,
+        "beta": 0.5235987755982988,
+        "v0_wind": 13,
+        "v_wind_noise": 1
+    },
+    "test_015_wind_speed_25": {
+        "num_obstacles": 30,
+        "nrows": 3,
+        "ncols": 10,
+        "x_spacing": 600,
+        "y_spacing": 1000,
+        "offset": 500.0,
+        "beta": 0.5235987755982988,
+        "v0_wind": 25,
+        "v_wind_noise": 1
+    },
+    "test_014_wind_speed_4": {
+        "num_obstacles": 30,
+        "nrows": 3,
+        "ncols": 10,
+        "x_spacing": 600,
+        "y_spacing": 1000,
+        "offset": 0,
+        "beta": 0.5235987755982988,
+        "v0_wind": 4,
+        "v_wind_noise": 1
+    },
+    "test_014_wind_speed_13": {
+        "num_obstacles": 30,
+        "nrows": 3,
+        "ncols": 10,
+        "x_spacing": 600,
+        "y_spacing": 1000,
+        "offset": 0,
+        "beta": 0.5235987755982988,
+        "v0_wind": 13,
+        "v_wind_noise": 1
+    },
+    "test_014_wind_speed_25": {
+        "num_obstacles": 30,
+        "nrows": 3,
+        "ncols": 10,
+        "x_spacing": 600,
+        "y_spacing": 1000,
+        "offset": 0,
+        "beta": 0.5235987755982988,
+        "v0_wind": 25,
+        "v_wind_noise": 1
+    }
+}
